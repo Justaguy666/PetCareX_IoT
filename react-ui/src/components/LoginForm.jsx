@@ -1,16 +1,46 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Eye, EyeOff } from 'lucide-react';
 
+// Zod validation schema
+const loginSchema = z.object({
+    email: z
+        .string()
+        .min(1, 'Email là bắt buộc')
+        .email('Email không hợp lệ'),
+    password: z
+        .string()
+        .min(1, 'Mật khẩu là bắt buộc')
+        .min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
+    rememberMe: z.boolean().optional(),
+});
+
 export default function LoginForm({ setView }) {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [rememberMe, setRememberMe] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // Handle login logic
-        console.log({ email, password, rememberMe });
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm({
+        resolver: zodResolver(loginSchema),
+        defaultValues: {
+            email: '',
+            password: '',
+            rememberMe: false,
+        },
+    });
+
+    const onSubmit = async (data) => {
+        try {
+            // Handle login logic
+            console.log('Login data:', data);
+            // TODO: Call API to authenticate
+        } catch (error) {
+            console.error('Login error:', error);
+        }
     };
 
     return (
@@ -25,11 +55,12 @@ export default function LoginForm({ setView }) {
                 {/* Tab Navigation */}
                 <div className="tab-container">
                     <div className="tab-wrapper">
-                        <button className="tab-button tab-active">
+                        <button className="tab-button tab-active" type="button">
                             Đăng nhập
                         </button>
                         <button 
                             className="tab-button tab-inactive"
+                            type="button"
                             onClick={() => setView('register')}
                         >
                             Đăng ký
@@ -38,21 +69,22 @@ export default function LoginForm({ setView }) {
                 </div>
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="login-form">
+                <form onSubmit={handleSubmit(onSubmit)} className="login-form">
                     {/* Email Field */}
                     <div className="form-group">
                         <label htmlFor="email" className="form-label">
                             Email
                         </label>
                         <input
+                            {...register('email')}
                             type="email"
                             id="email"
-                            className="form-input"
+                            className={`form-input ${errors.email ? 'form-input-error' : ''}`}
                             placeholder="Nhập email của bạn"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
                         />
+                        {errors.email && (
+                            <span className="form-error">{errors.email.message}</span>
+                        )}
                     </div>
 
                     {/* Password Field */}
@@ -62,13 +94,11 @@ export default function LoginForm({ setView }) {
                         </label>
                         <div className="password-input-wrapper">
                             <input
+                                {...register('password')}
                                 type={showPassword ? 'text' : 'password'}
                                 id="password"
-                                className="form-input"
+                                className={`form-input ${errors.password ? 'form-input-error' : ''}`}
                                 placeholder="Nhập mật khẩu"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
                             />
                             <button
                                 type="button"
@@ -83,16 +113,18 @@ export default function LoginForm({ setView }) {
                                 )}
                             </button>
                         </div>
+                        {errors.password && (
+                            <span className="form-error">{errors.password.message}</span>
+                        )}
                     </div>
 
                     {/* Remember Me & Forgot Password */}
                     <div className="form-options">
                         <label className="checkbox-label">
                             <input
+                                {...register('rememberMe')}
                                 type="checkbox"
                                 className="checkbox-input"
-                                checked={rememberMe}
-                                onChange={(e) => setRememberMe(e.target.checked)}
                             />
                             <span className="checkbox-text">Ghi nhớ đăng nhập</span>
                         </label>
@@ -106,8 +138,12 @@ export default function LoginForm({ setView }) {
                     </div>
 
                     {/* Submit Button */}
-                    <button type="submit" className="submit-button">
-                        🔑 Đăng nhập
+                    <button 
+                        type="submit" 
+                        className="submit-button"
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? 'Đang xử lý...' : '🔑 Đăng nhập'}
                     </button>
                 </form>
             </div>
