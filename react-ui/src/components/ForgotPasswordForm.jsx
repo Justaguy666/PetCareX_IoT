@@ -1,13 +1,37 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+// Zod validation schema
+const forgotPasswordSchema = z.object({
+    email: z
+        .string()
+        .min(1, 'Email là bắt buộc')
+        .email('Email không hợp lệ'),
+});
 
 export default function ForgotPasswordForm({ setView }) {
-    const [email, setEmail] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log({ email });
-        setIsSubmitted(true);
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm({
+        resolver: zodResolver(forgotPasswordSchema),
+        defaultValues: {
+            email: '',
+        },
+    });
+
+    const onSubmit = async (data) => {
+        try {
+            console.log('Forgot password data:', data);
+            setIsSubmitted(true);
+        } catch (error) {
+            console.error('Forgot password error:', error);
+        }
     };
 
     return (
@@ -19,7 +43,7 @@ export default function ForgotPasswordForm({ setView }) {
                 </div>
 
                 {!isSubmitted ? (
-                    <form onSubmit={handleSubmit} className="login-form">
+                    <form onSubmit={handleSubmit(onSubmit)} className="login-form">
                         <p className="form-description">
                             Nhập email của bạn và chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu.
                         </p>
@@ -30,19 +54,24 @@ export default function ForgotPasswordForm({ setView }) {
                                 Email
                             </label>
                             <input
+                                {...register('email')}
                                 type="email"
                                 id="email"
-                                className="form-input"
+                                className={`form-input ${errors.email ? 'form-input-error' : ''}`}
                                 placeholder="Nhập email của bạn"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
                             />
+                            {errors.email && (
+                                <span className="form-error">{errors.email.message}</span>
+                            )}
                         </div>
 
                         {/* Submit Button */}
-                        <button type="submit" className="submit-button">
-                            Gửi yêu cầu
+                        <button 
+                            type="submit" 
+                            className="submit-button"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? 'Đang gửi...' : 'Gửi yêu cầu'}
                         </button>
 
                         {/* Back to Login */}

@@ -1,31 +1,57 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Eye, EyeOff } from 'lucide-react';
 
+// Zod validation schema
+const registerSchema = z.object({
+    name: z
+        .string()
+        .min(1, 'Họ và tên là bắt buộc')
+        .min(2, 'Họ và tên phải có ít nhất 2 ký tự'),
+    email: z
+        .string()
+        .min(1, 'Email là bắt buộc')
+        .email('Email không hợp lệ'),
+    password: z
+        .string()
+        .min(1, 'Mật khẩu là bắt buộc')
+        .min(6, 'Mật khẩu phải có ít nhất 6 ký tự')
+        .regex(/[A-Z]/, 'Mật khẩu phải có ít nhất 1 chữ hoa')
+        .regex(/[0-9]/, 'Mật khẩu phải có ít nhất 1 số'),
+    confirmPassword: z
+        .string()
+        .min(1, 'Xác nhận mật khẩu là bắt buộc'),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: 'Mật khẩu không khớp',
+    path: ['confirmPassword'],
+});
+
 export default function RegisterForm({ setView }) {
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-    });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (formData.password !== formData.confirmPassword) {
-            alert('Mật khẩu không khớp!');
-            return;
-        }
-        // Handle register logic
-        console.log(formData);
-    };
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm({
+        resolver: zodResolver(registerSchema),
+        defaultValues: {
+            name: '',
+            email: '',
+            password: '',
+            confirmPassword: ''
+        },
+    });
 
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+    const onSubmit = async (data) => {
+        try {
+            console.log('Register data:', data);
+        } catch (error) {
+            console.error('Register error:', error);
+        }
     };
 
     return (
@@ -42,33 +68,34 @@ export default function RegisterForm({ setView }) {
                     <div className="tab-wrapper">
                         <button 
                             className="tab-button tab-inactive"
+                            type="button"
                             onClick={() => setView('login')}
                         >
                             Đăng nhập
                         </button>
-                        <button className="tab-button tab-active">
+                        <button className="tab-button tab-active" type="button">
                             Đăng ký
                         </button>
                     </div>
                 </div>
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="login-form">
+                <form onSubmit={handleSubmit(onSubmit)} className="login-form">
                     {/* Name Field */}
                     <div className="form-group">
                         <label htmlFor="name" className="form-label">
                             Họ và tên
                         </label>
                         <input
+                            {...register('name')}
                             type="text"
                             id="name"
-                            name="name"
-                            className="form-input"
+                            className={`form-input ${errors.name ? 'form-input-error' : ''}`}
                             placeholder="Nhập họ và tên"
-                            value={formData.name}
-                            onChange={handleChange}
-                            required
                         />
+                        {errors.name && (
+                            <span className="form-error">{errors.name.message}</span>
+                        )}
                     </div>
 
                     {/* Email Field */}
@@ -77,15 +104,15 @@ export default function RegisterForm({ setView }) {
                             Email
                         </label>
                         <input
+                            {...register('email')}
                             type="email"
                             id="email"
-                            name="email"
-                            className="form-input"
+                            className={`form-input ${errors.email ? 'form-input-error' : ''}`}
                             placeholder="Nhập email của bạn"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
                         />
+                        {errors.email && (
+                            <span className="form-error">{errors.email.message}</span>
+                        )}
                     </div>
 
                     {/* Password Field */}
@@ -95,14 +122,11 @@ export default function RegisterForm({ setView }) {
                         </label>
                         <div className="password-input-wrapper">
                             <input
+                                {...register('password')}
                                 type={showPassword ? 'text' : 'password'}
                                 id="password"
-                                name="password"
-                                className="form-input"
+                                className={`form-input ${errors.password ? 'form-input-error' : ''}`}
                                 placeholder="Nhập mật khẩu"
-                                value={formData.password}
-                                onChange={handleChange}
-                                required
                             />
                             <button
                                 type="button"
@@ -117,6 +141,9 @@ export default function RegisterForm({ setView }) {
                                 )}
                             </button>
                         </div>
+                        {errors.password && (
+                            <span className="form-error">{errors.password.message}</span>
+                        )}
                     </div>
 
                     {/* Confirm Password Field */}
@@ -126,14 +153,11 @@ export default function RegisterForm({ setView }) {
                         </label>
                         <div className="password-input-wrapper">
                             <input
+                                {...register('confirmPassword')}
                                 type={showConfirmPassword ? 'text' : 'password'}
                                 id="confirmPassword"
-                                name="confirmPassword"
-                                className="form-input"
+                                className={`form-input ${errors.confirmPassword ? 'form-input-error' : ''}`}
                                 placeholder="Nhập lại mật khẩu"
-                                value={formData.confirmPassword}
-                                onChange={handleChange}
-                                required
                             />
                             <button
                                 type="button"
@@ -148,11 +172,18 @@ export default function RegisterForm({ setView }) {
                                 )}
                             </button>
                         </div>
+                        {errors.confirmPassword && (
+                            <span className="form-error">{errors.confirmPassword.message}</span>
+                        )}
                     </div>
 
                     {/* Submit Button */}
-                    <button type="submit" className="submit-button">
-                        🔑 Đăng ký
+                    <button 
+                        type="submit" 
+                        className="submit-button"
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? 'Đang xử lý...' : '🔑 Đăng ký'}
                     </button>
                 </form>
             </div>
