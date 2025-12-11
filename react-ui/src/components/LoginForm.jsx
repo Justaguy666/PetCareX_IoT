@@ -35,9 +35,7 @@ export default function LoginForm({ setView }) {
 
     const onSubmit = async (data) => {
         try {
-            // Handle login logic
             console.log('Login data:', data);
-            // TODO: Call API to authenticate
         } catch (error) {
             console.error('Login error:', error);
         }

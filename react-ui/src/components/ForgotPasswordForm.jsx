@@ -28,7 +28,6 @@ export default function ForgotPasswordForm({ setView }) {
     const onSubmit = async (data) => {
         try {
             console.log('Forgot password data:', data);
-            // TODO: Call API to send reset password email
             setIsSubmitted(true);
         } catch (error) {
             console.error('Forgot password error:', error);

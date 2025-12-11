@@ -18,30 +18,70 @@ export default function App() {
 
       <Route 
         path="/"
-        element={<MainLayout><Dashboard /></MainLayout>}
+        element={
+          <MainLayout 
+            title="Máy Chăm Sóc Thú Cưng" 
+            intro="Chăm sóc thú cưng của bạn"
+            icon="🐾"
+          >
+            <Dashboard />
+          </MainLayout>
+        }
       />
 
-        <Route
-          path="/schedule"
-          element={<MainLayout><Schedule /></MainLayout>}
-        />
-        
-        <Route
-          path="/history"
-          element={<MainLayout><History /></MainLayout>}
-        />
+      <Route
+        path="/schedule"
+        element={
+          <MainLayout 
+            title="Lịch Trình" 
+            intro="Quản lý lịch cho ăn tự động"
+            icon="📅"
+          >
+            <Schedule />
+          </MainLayout>
+        }
+      />
+      
+      <Route
+        path="/history"
+        element={
+          <MainLayout 
+            title="Lịch Sử" 
+            intro="Theo dõi hoạt động của máy"
+            icon="📊"
+          >
+            <History />
+          </MainLayout>
+        }
+      />
 
-        <Route
-          path="/settings"
-          element={<MainLayout><Settings /></MainLayout>}
-        />
+      <Route
+        path="/settings"
+        element={
+          <MainLayout 
+            title="Thiết Lập" 
+            intro="Cấu hình máy chăm sóc thú cưng"
+            icon="⚙️"
+          >
+            <Settings />
+          </MainLayout>
+        }
+      />
 
-        <Route
-          path="/personal-information"
-          element={<MainLayout><PersonalInformation /></MainLayout>}
-        />
+      <Route
+        path="/personal-information"
+        element={
+          <MainLayout 
+            title="Thông Tin Cá Nhân" 
+            intro="Quản lý tài khoản của bạn"
+            icon="👤"
+          >
+            <PersonalInformation />
+          </MainLayout>
+        }
+      />
 
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }

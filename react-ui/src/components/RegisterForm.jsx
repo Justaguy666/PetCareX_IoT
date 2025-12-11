@@ -48,9 +48,7 @@ export default function RegisterForm({ setView }) {
 
     const onSubmit = async (data) => {
         try {
-            // Handle register logic
             console.log('Register data:', data);
-            // TODO: Call API to register user
         } catch (error) {
             console.error('Register error:', error);
         }
