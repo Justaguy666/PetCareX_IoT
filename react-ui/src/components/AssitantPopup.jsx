@@ -106,19 +106,16 @@ export default function AssistantPopup() {
                     onClick={handleClick}
                 >
                     <div className="assistant-button-icon">
-                        <svg width="27" height="27" viewBox="0 0 27 27" fill="none">
-                            <path d="M13.5 2C7.15 2 2 6.48 2 12C2 14.85 3.35 17.42 5.5 19.18V24L10.18 21.26C11.23 21.53 12.34 21.68 13.5 21.68C19.85 21.68 25 17.2 25 11.68C25 6.16 19.85 2 13.5 2Z" fill="url(#paint0_linear)"/>
-                            <ellipse cx="13.5" cy="12" rx="2" ry="2" fill="url(#paint1_linear)"/>
+                        <svg width="60" height="60" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <defs>
-                                <linearGradient id="paint0_linear" x1="2" y1="2" x2="25" y2="24" gradientUnits="userSpaceOnUse">
-                                    <stop stopColor="#0FAFFF"/>
-                                    <stop offset="1" stopColor="#CC23D1"/>
-                                </linearGradient>
-                                <linearGradient id="paint1_linear" x1="11.5" y1="10" x2="15.5" y2="14" gradientUnits="userSpaceOnUse">
-                                    <stop stopColor="#FDFDFD"/>
-                                    <stop offset="1" stopColor="#CCEAFF"/>
+                                <linearGradient id="bubbleGrad" x1="4" y1="4" x2="52" y2="52" gradientUnits="userSpaceOnUse">
+                                    <stop stopColor="#38BDF8"/>
+                                    <stop offset="1" stopColor="#818CF8"/>
                                 </linearGradient>
                             </defs>
+                            <path d="M28 4C15.85 4 6 12.95 6 24C6 29.56 8.87 34.52 13.4 37.92V48L23.27 42.18C24.82 42.5 26.38 42.68 28 42.68C40.15 42.68 50 33.73 50 22.68C50 11.63 40.15 4 28 4Z" fill="url(#bubbleGrad)"/>
+                            <rect x="16" y="20" width="20" height="3.5" rx="1.75" fill="white"/>
+                            <rect x="16" y="27" width="13" height="3.5" rx="1.75" fill="white"/>
                         </svg>
                     </div>
                 </div>

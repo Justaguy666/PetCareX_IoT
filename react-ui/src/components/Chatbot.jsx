@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Trash2 } from 'lucide-react';
+import { X, Trash2, Bot, Activity, HelpCircle, Utensils, Send } from 'lucide-react';
 
 const quickActions = [
-    { emoji: '💡', label: 'Phân tích sức khỏe' },
-    { emoji: 'ℹ️', label: 'Hướng dẫn sử dụng' },
-    { emoji: '🍽️', label: 'Tư vấn dinh dưỡng' },
+    { Icon: Activity, label: 'Phân tích sức khỏe' },
+    { Icon: HelpCircle, label: 'Hướng dẫn sử dụng' },
+    { Icon: Utensils, label: 'Tư vấn dinh dưỡng' },
 ];
 
 export default function Chatbot({ onClose, messages, isLoading, error, sendMessage, clearHistory }) {
@@ -42,7 +42,7 @@ export default function Chatbot({ onClose, messages, isLoading, error, sendMessa
                 <div className="chatbot-header">
                     <div className="chatbot-header-left">
                         <div className="chatbot-avatar">
-                            <span>🤖</span>
+                            <Bot size={24} />
                         </div>
                         <div className="chatbot-info">
                             <h3 className="chatbot-title">Trợ lý AI</h3>
@@ -99,22 +99,25 @@ export default function Chatbot({ onClose, messages, isLoading, error, sendMessa
                             onClick={handleSend}
                             disabled={!inputValue.trim() || isLoading}
                         >
-                            <span>📤</span>
+                            <Send size={18} />
                         </button>
                     </div>
                     
-                    {/* Quick Actions */}
                     <div className="chatbot-quick-actions">
-                        {quickActions.map((action, index) => (
-                            <button
-                                key={index}
-                                className={`chatbot-quick-btn ${isLoading ? 'disabled' : ''}`}
-                                onClick={() => handleQuickAction(action)}
-                                disabled={isLoading}
-                            >
-                                {action.emoji} {action.label}
-                            </button>
-                        ))}
+                        {quickActions.map((action, index) => {
+                            const IconComponent = action.Icon;
+                            return (
+                                <button
+                                    key={index}
+                                    className={`chatbot-quick-btn ${isLoading ? 'disabled' : ''}`}
+                                    onClick={() => handleQuickAction(action)}
+                                    disabled={isLoading}
+                                >
+                                    <IconComponent size={14} />
+                                    <span>{action.label}</span>
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
             </div>

@@ -2,11 +2,11 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Calendar, BarChart3, Settings, User } from 'lucide-react';
 
 const navItems = [
-    { path: '/', icon: Home, label: 'Trang chủ', emoji: '🏠' },
-    { path: '/schedule', icon: Calendar, label: 'Lịch trình', emoji: '📅' },
-    { path: '/history', icon: BarChart3, label: 'Lịch sử', emoji: '📊' },
-    { path: '/settings', icon: Settings, label: 'Thiết lập', emoji: '⚙️' },
-    { path: '/personal-information', icon: User, label: 'Thông tin', emoji: '👤' },
+    { path: '/', Icon: Home, label: 'Trang chủ' },
+    { path: '/schedule', Icon: Calendar, label: 'Lịch trình' },
+    { path: '/history', Icon: BarChart3, label: 'Lịch sử' },
+    { path: '/settings', Icon: Settings, label: 'Thiết lập' },
+    { path: '/personal-information', Icon: User, label: 'Thông tin' },
 ];
 
 export default function Footer() {
@@ -17,6 +17,7 @@ export default function Footer() {
             <div className="footer-nav-container">
                 {navItems.map((item) => {
                     const isActive = location.pathname === item.path;
+                    const IconComponent = item.Icon;
                     return (
                         <NavLink
                             key={item.path}
@@ -24,7 +25,7 @@ export default function Footer() {
                             className={`footer-nav-item ${isActive ? 'footer-nav-item-active' : ''}`}
                         >
                             <div className="footer-nav-icon-wrapper">
-                                <span className="footer-nav-emoji">{item.emoji}</span>
+                                <IconComponent size={22} strokeWidth={isActive ? 2.5 : 2} />
                             </div>
                             <span className={`footer-nav-label ${isActive ? 'footer-nav-label-active' : ''}`}>
                                 {item.label}

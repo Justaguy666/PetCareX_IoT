@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import { PawPrint, Calendar, BarChart3, Settings as SettingsIcon, User } from 'lucide-react';
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Schedule from './pages/Schedule.jsx';
@@ -22,7 +23,7 @@ export default function App() {
           <MainLayout 
             title="Máy Chăm Sóc Thú Cưng" 
             intro="Chăm sóc thú cưng của bạn"
-            icon="🐾"
+            Icon={PawPrint}
           >
             <Dashboard />
           </MainLayout>
@@ -35,7 +36,7 @@ export default function App() {
           <MainLayout 
             title="Lịch Trình" 
             intro="Quản lý lịch cho ăn tự động"
-            icon="📅"
+            Icon={Calendar}
           >
             <Schedule />
           </MainLayout>
@@ -48,7 +49,7 @@ export default function App() {
           <MainLayout 
             title="Lịch Sử" 
             intro="Theo dõi hoạt động của máy"
-            icon="📊"
+            Icon={BarChart3}
           >
             <History />
           </MainLayout>
@@ -61,7 +62,7 @@ export default function App() {
           <MainLayout 
             title="Thiết Lập" 
             intro="Cấu hình máy chăm sóc thú cưng"
-            icon="⚙️"
+            Icon={SettingsIcon}
           >
             <Settings />
           </MainLayout>
@@ -74,7 +75,7 @@ export default function App() {
           <MainLayout 
             title="Thông Tin Cá Nhân" 
             intro="Quản lý tài khoản của bạn"
-            icon="👤"
+            Icon={User}
           >
             <PersonalInformation />
           </MainLayout>

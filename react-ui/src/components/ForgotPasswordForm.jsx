@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { ArrowLeft, PawPrint, CheckCircle } from 'lucide-react';
 
 // Zod validation schema
 const forgotPasswordSchema = z.object({
@@ -38,7 +39,10 @@ export default function ForgotPasswordForm({ setView }) {
         <div className="login-container">
             <div className="login-card">
                 <div className="login-header">
-                    <h1 className="login-title">🐾 PetCare</h1>
+                    <h1 className="login-title">
+                        <PawPrint size={32} className="login-title-icon" />
+                        <span>PetCare</span>
+                    </h1>
                     <p className="login-subtitle">Quên mật khẩu</p>
                 </div>
 
@@ -80,14 +84,16 @@ export default function ForgotPasswordForm({ setView }) {
                             className="back-button"
                             onClick={() => setView('login')}
                         >
-                            ← Quay lại đăng nhập
+                            <ArrowLeft size={16} />
+                            <span>Quay lại đăng nhập</span>
                         </button>
                     </form>
                 ) : (
                     <div className="success-message">
-                        <p className="success-text">
-                            ✓ Đã gửi email hướng dẫn đặt lại mật khẩu. Vui lòng kiểm tra hộp thư của bạn.
-                        </p>
+                        <div className="success-text">
+                            <CheckCircle size={20} className="success-icon" />
+                            <span>Đã gửi email hướng dẫn đặt lại mật khẩu. Vui lòng kiểm tra hộp thư của bạn.</span>
+                        </div>
                         <button
                             className="submit-button"
                             onClick={() => setView('login')}

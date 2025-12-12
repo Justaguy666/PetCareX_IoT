@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, PawPrint } from 'lucide-react';
 
 // Zod validation schema
 const registerSchema = z.object({
@@ -57,9 +57,11 @@ export default function RegisterForm({ setView }) {
     return (
         <div className="login-container">
             <div className="login-card">
-                {/* Header Section */}
                 <div className="login-header">
-                    <h1 className="login-title">🐾 PetCare</h1>
+                    <h1 className="login-title">
+                        <PawPrint size={32} className="login-title-icon" />
+                        <span>PetCare</span>
+                    </h1>
                     <p className="login-subtitle">Chăm sóc thú cưng của bạn</p>
                 </div>
 
