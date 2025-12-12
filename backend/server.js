@@ -5,7 +5,6 @@ import mongoose from 'mongoose';
 
 dotenv.config();
 
-import chatRoutes from './routes/chat.js';
 import authRoutes from './routes/auth.js';
 
 const app = express();
@@ -19,7 +18,6 @@ app.use(cors({
 app.use(express.json());
 
 // Routes
-app.use('/api/chat', chatRoutes);
 app.use('/api/auth', authRoutes);
 
 // Health check

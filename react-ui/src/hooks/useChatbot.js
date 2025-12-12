@@ -1,6 +1,5 @@
-import { useState, useCallback, useRef } from 'react';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { useState, useCallback } from 'react';
+import chatbotService from '../services/chatbotServices';
 
 export default function useChatbot() {
     const [messages, setMessages] = useState([
@@ -13,7 +12,6 @@ export default function useChatbot() {
     ]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const sessionIdRef = useRef(`session_${Date.now()}`);
 
     const sendMessage = useCallback(async (text) => {
         if (!text.trim()) return;
@@ -30,26 +28,11 @@ export default function useChatbot() {
         setError(null);
 
         try {
-            const response = await fetch(`${API_URL}/api/chat`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    message: text.trim(),
-                    sessionId: sessionIdRef.current
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Không thể kết nối đến server');
-            }
-
-            const data = await response.json();
+            const response = await chatbotService.sendMessage(text.trim());
 
             const botMessage = {
                 id: Date.now() + 1,
-                text: data.response,
+                text: response.answer,
                 isBot: true,
                 time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
             };
@@ -60,7 +43,6 @@ export default function useChatbot() {
             console.error('Chat Error:', err);
             setError(err.message);
             
-            // Fallback response khi không kết nối được
             const fallbackMessage = {
                 id: Date.now() + 1,
                 text: 'Xin lỗi, tôi đang gặp sự cố kết nối. Vui lòng thử lại sau!',
@@ -74,13 +56,7 @@ export default function useChatbot() {
     }, []);
 
     const clearHistory = useCallback(async () => {
-        try {
-            await fetch(`${API_URL}/api/chat/${sessionIdRef.current}`, {
-                method: 'DELETE',
-            });
-        } catch (err) {
-            console.error('Clear history error:', err);
-        }
+        await chatbotService.clearConversation();
 
         setMessages([
             {
@@ -90,7 +66,6 @@ export default function useChatbot() {
                 time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
             }
         ]);
-        sessionIdRef.current = `session_${Date.now()}`;
     }, []);
 
     return {
