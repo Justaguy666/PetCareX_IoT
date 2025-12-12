@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, PawPrint } from 'lucide-react';
+import { Eye, EyeOff, PawPrint, Key } from 'lucide-react';
 
 // Zod validation schema
 const loginSchema = z.object({
@@ -143,7 +143,12 @@ export default function LoginForm({ setView }) {
                         className="submit-button"
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? 'Đang xử lý...' : '🔑 Đăng nhập'}
+                        {isSubmitting ? 'Đang xử lý...' : (
+                            <>
+                                <Key size={18} />
+                                Đăng nhập
+                            </>
+                        )}
                     </button>
                 </form>
             </div>

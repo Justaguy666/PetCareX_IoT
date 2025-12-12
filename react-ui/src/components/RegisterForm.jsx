@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, PawPrint } from 'lucide-react';
+import { Eye, EyeOff, PawPrint, UserPlus } from 'lucide-react';
 
 // Zod validation schema
 const registerSchema = z.object({
@@ -185,7 +185,12 @@ export default function RegisterForm({ setView }) {
                         className="submit-button"
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? 'Đang xử lý...' : '🔑 Đăng ký'}
+                        {isSubmitting ? 'Đang xử lý...' : (
+                            <>
+                                <UserPlus size={18} />
+                                Đăng ký
+                            </>
+                        )}
                     </button>
                 </form>
             </div>

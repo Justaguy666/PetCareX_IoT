@@ -1,0 +1,312 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 16px;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+  padding: 20px 24px;
+  border-radius: 16px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.card-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.card-percentage {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+/* Food Card */
+.food-card {
+  background: #F0FDF4;
+}
+
+.food-title {
+  color: #065F46;
+}
+
+.food-percentage {
+  color: #059669;
+}
+
+/* Water Card */
+.water-card {
+  background: rgba(190, 239, 252, 0.8);
+}
+
+.water-title {
+  color: #06075F;
+}
+
+.water-percentage {
+  color: #054B96;
+}
+
+/* Progress Bar */
+.progress-bar {
+  width: 100%;
+  height: 14px;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+.food-progress-bg {
+  background: #D1FAE5;
+}
+
+.food-progress-fill {
+  background: linear-gradient(90deg, #059669 0%, #10B981 100%);
+}
+
+.water-progress-bg {
+  background: #D5D1FA;
+}
+
+.water-progress-fill {
+  background: linear-gradient(90deg, #054B96 0%, #105FB9 100%);
+}
+
+/* Action Buttons */
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 68px;
+  border: none;
+  border-radius: 16px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 28px;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1), 0px 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.12), 0px 12px 17px rgba(0, 0, 0, 0.12);
+}
+
+.action-button:active {
+  transform: translateY(0);
+}
+
+.feed-button {
+  background: #059669;
+}
+
+.feed-button:hover {
+  background: #047857;
+}
+
+.water-button {
+  background: rgba(46, 50, 255, 0.72);
+}
+
+.water-button:hover {
+  background: rgba(46, 50, 255, 0.85);
+}
+
+/* Info Cards */
+.info-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 12px;
+}
+
+.info-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.info-label {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.info-value {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+/* Last Fed Card */
+.last-fed-card {
+  background: #FEF3C7;
+}
+
+.last-fed-icon {
+  background: #F59E0B;
+}
+
+.last-fed-label {
+  color: #92400E;
+}
+
+.last-fed-value {
+  color: #451A03;
+}
+
+/* Next Feed Card */
+.next-feed-card {
+  background: #FCE7F3;
+}
+
+.next-feed-icon {
+  background: #EC4899;
+}
+
+.next-feed-label {
+  color: #BE185D;
+}
+
+.next-feed-value {
+  color: #831843;
+}
+
+@media (max-width: 480px) {
+  .dashboard {
+    gap: 10px;
+    max-width: 100%;
+    padding: 12px 16px;
+  }
+
+  .dashboard-card {
+    padding: 18px 20px;
+  }
+
+  .card-title {
+    font-size: 15px;
+  }
+
+  .card-percentage {
+    font-size: 15px;
+  }
+
+  .progress-bar {
+    height: 12px;
+  }
+
+  .action-button {
+    height: 60px;
+    font-size: 16px;
+    gap: 8px;
+  }
+
+  .info-card {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  .info-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .info-label {
+    font-size: 13px;
+  }
+
+  .info-value {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .dashboard {
+    max-width: 500px;
+    padding: 16px 20px;
+  }
+}
+
+@media (min-width: 769px) {
+  .dashboard {
+    max-width: 800px;
+    padding: 24px 32px 40px;
+  }
+
+  .dashboard-card {
+    padding: 28px 32px;
+  }
+
+  .card-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .card-title {
+    font-size: 18px;
+  }
+
+  .card-value {
+    font-size: 42px;
+  }
+
+  .action-button {
+    height: 80px;
+    font-size: 22px;
+    border-radius: 20px;
+  }
+
+  .info-card {
+    padding: 22px 28px;
+  }
+
+  .info-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .info-label {
+    font-size: 15px;
+  }
+
+  .info-value {
+    font-size: 20px;
+  }
+}
