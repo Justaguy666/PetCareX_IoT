@@ -1,12 +1,9 @@
-import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-const router = express.Router();
-
 const users = [];
 
-router.post('/register', async (req, res) => {
+export const register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
@@ -47,9 +44,9 @@ router.post('/register', async (req, res) => {
         console.error('Register Error:', error);
         res.status(500).json({ error: 'Đã xảy ra lỗi' });
     }
-});
+};
 
-router.post('/login', async (req, res) => {
+export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -83,9 +80,9 @@ router.post('/login', async (req, res) => {
         console.error('Login Error:', error);
         res.status(500).json({ error: 'Đã xảy ra lỗi' });
     }
-});
+};
 
-router.get('/me', (req, res) => {
+export const getMe = (req, res) => {
     const token = req.headers.authorization?.replace('Bearer ', '');
     
     if (!token) {
@@ -104,6 +101,4 @@ router.get('/me', (req, res) => {
     } catch (error) {
         res.status(401).json({ error: 'Invalid token' });
     }
-});
-
-export default router;
+};
