@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import chatbotService from '../services/chatbotServices';
+import chatbotService from '../services/chatbotService.js';
 
 export default function useChatbot() {
     const [messages, setMessages] = useState([
@@ -10,6 +10,7 @@ export default function useChatbot() {
             time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
         }
     ]);
+
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -49,6 +50,7 @@ export default function useChatbot() {
                 isBot: true,
                 time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
             };
+            
             setMessages(prev => [...prev, fallbackMessage]);
         } finally {
             setIsLoading(false);
