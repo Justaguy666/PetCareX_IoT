@@ -2,9 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { X, Trash2, Bot, Activity, HelpCircle, Utensils, Send } from 'lucide-react';
 
 const quickActions = [
-    { Icon: Activity, label: 'Phân tích sức khỏe' },
-    { Icon: HelpCircle, label: 'Hướng dẫn sử dụng' },
-    { Icon: Utensils, label: 'Tư vấn dinh dưỡng' },
+    { Icon: Activity, label: 'Phân tích' },
+    { Icon: HelpCircle, label: 'Hướng dẫn' },
+    { Icon: Utensils, label: 'Tư vấn' },
 ];
 
 export default function Chatbot({ onClose, messages, isLoading, error, sendMessage, clearHistory }) {
