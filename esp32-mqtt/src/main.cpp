@@ -1,13 +1,13 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 
-const char* ssid = "YOUR_WIFI";
-const char* password = "YOUR_WIFI_PASSWORD";
+const char* ssid = "Wokwi-GUEST";
+const char* password = "";
 
 const char* mqtt_server = "q8a52061.ala.dedicated.aws.emqxcloud.com";
 const int mqtt_port = 1883;
 
-const char* mqtt_user = "khoinm_123";
+const char* mqtt_user = "vinhok_123";
 const char* mqtt_pass = "123456";
 
 WiFiClient espClient;
@@ -32,7 +32,7 @@ void setup_wifi() {
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+    delay(1000);
     Serial.print(".");
   }
 
@@ -68,7 +68,7 @@ void loop() {
     reconnect();
   }
   client.loop();
-
+  Serial.println("Hello World!");
   client.publish("petcarex/status", "ESP32 Alive!");
   delay(3000);
 }

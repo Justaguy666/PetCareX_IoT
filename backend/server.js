@@ -1,12 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
+import route from './routes/index.js';
+import db from './config/db.js'
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
-
-import routes from './routes/index.route.js';
-
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -17,26 +16,16 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Cookie
+app.use(cookieParser());
+
 // Routes
-app.use('/api', routes);
+route(app);
 
-// Connect to MongoDB
-const connectDB = async () => {
-    try {
-        if (process.env.MONGODB_URI) {
-            await mongoose.connect(process.env.MONGODB_URI);
-            console.log('✅ Connected to MongoDB');
-        } else {
-            console.log('⚠️ MongoDB URI not provided, running without database');
-        }
-    } catch (error) {
-        console.error('❌ MongoDB connection error:', error.message);
-    }
-};
-
-connectDB();
+// Database
+db();
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
