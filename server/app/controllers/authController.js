@@ -2,6 +2,8 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import RefreshToken from '../models/RefreshToken.js';
+import crypto from "crypto";
+import sendMail from '../../services/mail.js';
 
 class AuthController {
     register = async (req, res) => {
@@ -62,7 +64,7 @@ class AuthController {
                         .json({ error: 'Vui lòng điền đầy đủ thông tin' });
             }
 
-            const user = await  User.findOne({ email: String(email).toLowerCase().trim() }).select('+password');
+            const user = await User.findOne({ email: String(email).toLowerCase().trim() }).select('+password');
             if(!user) {
                 return res
                         .status(401)
@@ -225,6 +227,122 @@ class AuthController {
             });
         } catch (error) {
             console.log('[API/AUTH/LOGOUT]: ', error);
+            return res
+                    .status(500)
+                    .json({ error: 'Internal Server Error' });
+        }
+    }
+
+    forgotPassword = async(req, res) => {
+        try {
+            const { email } = req.body;
+
+            if (!email) {
+                return res
+                        .status(400)
+                        .json({ message: "Yêu cầu email" });
+            }
+
+            const user = await User.findOne({ email: String(email).toLowerCase().trim() }).select('+password');
+            if(!user) {
+                return res
+                        .json({ message: 'Nếu email tồn tại, mật khẩu mới sẽ được gửi' });
+            }
+
+            const tempPassword = this.generatePassword();
+
+            const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+            user.password = hashedPassword;
+            await user.save();
+
+            await sendMail({
+                to: user.email,
+                subject: "Mật khẩu tạm thời",
+                html: `
+                    <p>Mật khẩu tạm thời của bạn:</p>
+
+                    <input
+                        type="password"
+                        value=${tempPassword}
+                        readonly
+                        style="
+                            border: none;
+                            background: #f3f3f3;
+                            padding: 10px;
+                            font-size: 18px;
+                            width: 220px;
+                            letter-spacing: 2px;
+                        "
+                    />
+
+                    <p style="font-size:12px;color:#666">
+                        Click vào ô để xem mật khẩu
+                    </p>
+                `,
+            });
+
+            return res
+                    .json({ message: 'Nếu email tồn tại, mật khẩu mới sẽ được gửi' });
+        } catch (error) {
+            console.log('[API/AUTH/FORGOTPASSWORD]: ', error);
+            return res
+                    .status(500)
+                    .json({ error: 'Internal Server Error' });
+        }
+    }
+
+    generatePassword = () => {
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";
+        const length = 10;
+
+        const bytes = crypto.randomBytes(length);
+        let password = "";
+
+        for (let i = 0; i < length; i++) {
+            password += chars[bytes[i] % chars.length];
+        }
+
+        return password;
+    }
+
+    changePassword = async (req, res) => {
+        try {
+            const { userId, oldPassword, newPassword } = req.body;
+
+            if (!userId || !oldPassword || !newPassword) {
+                return res
+                        .status(400)
+                        .json({ error: 'Vui lòng điền đầy đủ thông tin' });
+            }
+
+            const user = await User.findById(userId).select('+password');
+            if(!user) {
+                return res
+                        .status(401)
+                        .json({ error: 'Người dùng không tồn tại' });
+            }
+
+            const isMatch = await bcrypt.compare(oldPassword, user.password);
+            if (!isMatch) {
+                return res
+                        .status(400)
+                        .json({ error: "Mật khẩu cũ không đúng" });
+            }
+
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+            user.password = hashedPassword;
+            await user.save();
+
+            return res
+                    .status(200)
+                    .json({
+                        success: true,
+                        message: 'Đổi mật khẩu thành công'
+                    })
+        } catch (error) {
+            console.log('[API/AUTH/CHANGEPASSWORD]: ', error);
             return res
                     .status(500)
                     .json({ error: 'Internal Server Error' });

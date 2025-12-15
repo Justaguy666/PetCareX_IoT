@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, PawPrint, Key } from 'lucide-react';
+import { toast } from "react-toastify";
 
 // Zod validation schema
 const loginSchema = z.object({
@@ -22,7 +23,6 @@ const loginSchema = z.object({
 export default function LoginForm({ setView }) {
     const [showPassword, setShowPassword] = useState(false);
     const { login } = useAuth();
-    const [formError, setFormError] = useState('');
 
     const {
         register,
@@ -38,11 +38,10 @@ export default function LoginForm({ setView }) {
     });
 
     const onSubmit = async (data) => {
-        setFormError('');
         try {
             await login(data.email, data.password);
         } catch (error) {
-            setFormError(error.message || 'Đăng nhập thất bại');
+            toast.error(error?.message || 'Đăng nhập thất bại')
         }
     };
 
@@ -75,7 +74,6 @@ export default function LoginForm({ setView }) {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit(onSubmit)} className="login-form">
-                    {formError && <div className="form-error" style={{ textAlign: 'center' }}>{formError}</div>}
                     {/* Email Field */}
                     <div className="form-group">
                         <label htmlFor="email" className="form-label">

@@ -15,4 +15,10 @@ router.post('/refresh-token', AuthController.refreshToken);
 // [POST] /api/auth/logout
 router.post('/logout', AuthController.logout);
 
+// [POST] /api/auth/forgotPassword
+router.post('/forgot-password', AuthController.forgotPassword);
+
+// [POST] /api/auth/changePassword
+router.post('/change-password', AuthController.changePassword);
+
 export default router;

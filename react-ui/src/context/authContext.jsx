@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import authService from '../services/authService';
 import userService from '../services/userService';
+import { toast } from "react-toastify";
 
 const AuthContext = createContext();
 
@@ -37,10 +38,22 @@ export function AuthProvider({ children }) {
             setUser({ id: res.data.id });
             localStorage.setItem('token', res.data.accessToken);
             navigate("/");
+            toast.success(res?.message || 'Đăng nhập thành công');
         } catch (error) {
-            throw error;
+            throw Error(error?.message);
         }
     };
+
+    const register = async (name, email, password) => {
+        try {
+            const res = await authService.register(name, email, password);
+            setUser(null);
+            navigate("/login");
+            toast.success(res?.message || 'Đăng ký thành công');
+        } catch (error) {
+            throw Error(error?.message);
+        }
+    }
 
     const logout = () => {
         setUser(null);
@@ -52,7 +65,7 @@ export function AuthProvider({ children }) {
 
     if (loading) return null;
     return (
-        <AuthContext.Provider value={{ user, login, logout, isAuthenticated }}>
+        <AuthContext.Provider value={{ user, login, logout, register, isAuthenticated }}>
             {children}
         </AuthContext.Provider>
     );

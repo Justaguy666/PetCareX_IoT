@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import authService from '../services/authService';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, PawPrint, UserPlus } from 'lucide-react';
+import { useAuth } from '../context/authContext';
+import { toast } from "react-toastify";
 
 // Zod validation schema
 const registerSchema = z.object({
@@ -32,9 +33,8 @@ const registerSchema = z.object({
 export default function RegisterForm({ setView }) {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [formError, setFormError] = useState('');
-    const [formSuccess, setFormSuccess] = useState('');
-
+    const { register: registerFunc } = useAuth();
+    
     const {
         register,
         handleSubmit,
@@ -50,14 +50,10 @@ export default function RegisterForm({ setView }) {
     });
 
     const onSubmit = async (data) => {
-        setFormError('');
-        setFormSuccess('');
         try {
-            await authService.register(data.name, data.email, data.password);
-            setFormSuccess('Đăng ký thành công! Vui lòng đăng nhập.');
-            setTimeout(() => setView('login'), 1200);
+            await registerFunc(data.name, data.email, data.password);
         } catch (error) {
-            setFormError(error.message || 'Đăng ký thất bại');
+            toast.error(error?.message || 'Đăng ký thất bại');
         }
     };
 
@@ -90,8 +86,6 @@ export default function RegisterForm({ setView }) {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit(onSubmit)} className="login-form">
-                    {formError && <div className="form-error" style={{ textAlign: 'center' }}>{formError}</div>}
-                    {formSuccess && <div className="form-success" style={{ textAlign: 'center', color: '#059669' }}>{formSuccess}</div>}
                     {/* Name Field */}
                     <div className="form-group">
                         <label htmlFor="name" className="form-label">
