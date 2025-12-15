@@ -157,31 +157,53 @@ class UserController {
     async getWeeklyReport(req, res) {
         try {
             const userId = req.user.id;
-            
-            const oneWeekAgo = new Date();
-            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-            
+            const now = new Date();
+            const currentDay = now.getDay();
+            const monday = new Date(now);
+            monday.setDate(now.getDate() - ((currentDay + 6) % 7));
+            monday.setHours(0, 0, 0, 0);
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+            sunday.setHours(23, 59, 59, 999);
+
             const user = await User.findById(userId, { history: 1 });
-            
-            const weeklyHistory = user.history.filter(h => new Date(h.time) >= oneWeekAgo);
-            
-            const dailyData = {};
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                const dateStr = date.toISOString().split('T')[0];
-                dailyData[dateStr] = { feedings: 0, amount: 0, success: 0, missed: 0 };
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
             }
-            
-            weeklyHistory.forEach(h => {
+
+            const weekHistory = user.history.filter(h => {
+                const t = new Date(h.time);
+                return t >= monday && t <= sunday;
+            });
+
+            const dailyData = [];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(monday);
+                d.setDate(monday.getDate() + i);
+                const dateStr = d.toISOString().split('T')[0];
+                dailyData.push({
+                    date: dateStr,
+                    weekday: i < 6 ? `T${i+2}` : 'CN',
+                    feedings: 0,
+                    amount: 0,
+                    success: 0,
+                    missed: 0
+                });
+            }
+
+            const dateToIndex = {};
+            dailyData.forEach((item, idx) => { dateToIndex[item.date] = idx; });
+
+            weekHistory.forEach(h => {
                 const dateStr = new Date(h.time).toISOString().split('T')[0];
-                if (dailyData[dateStr]) {
-                    dailyData[dateStr].feedings++;
-                    dailyData[dateStr].amount += h.amount;
-                    dailyData[dateStr][h.status]++;
+                const idx = dateToIndex[dateStr];
+                if (idx !== undefined) {
+                    dailyData[idx].feedings++;
+                    dailyData[idx].amount += h.amount;
+                    dailyData[idx][h.status]++;
                 }
             });
-            
+
             res.json({ weeklyReport: dailyData });
         } catch (e) {
             console.error('Error fetching weekly report:', e);

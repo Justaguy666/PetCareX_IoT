@@ -14,9 +14,11 @@ export default function History() {
         missedFeedings: 0
     });
     const [historyItems, setHistoryItems] = useState([]);
+    const [weeklyReport, setWeeklyReport] = useState([]);
 
     useEffect(() => {
         fetchData();
+        fetchWeeklyReport();
     }, []);
 
     const fetchData = async () => {
@@ -32,11 +34,20 @@ export default function History() {
             });
 
             const settingsRes = await userService.getSchedules();
-            // History would come from a separate endpoint - for now mock with settings
         } catch (error) {
             console.error('Error fetching history:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchWeeklyReport = async () => {
+        try {
+            const res = await userService.getWeeklyReport();
+            setWeeklyReport(res.weeklyReport || []);
+        } catch (error) {
+            setWeeklyReport([]);
+            console.error('Error fetching weekly report:', error);
         }
     };
 
@@ -61,6 +72,23 @@ export default function History() {
     if (loading) {
         return <div className="history-page"><p>Đang tải...</p></div>;
     }
+
+    const getWeeklyChartData = () => {
+        if (!weeklyReport || weeklyReport.length === 0) return [
+            { day: 'T2', feedings: 0, amount: 0 },
+            { day: 'T3', feedings: 0, amount: 0 },
+            { day: 'T4', feedings: 0, amount: 0 },
+            { day: 'T5', feedings: 0, amount: 0 },
+            { day: 'T6', feedings: 0, amount: 0 },
+            { day: 'T7', feedings: 0, amount: 0 },
+            { day: 'CN', feedings: 0, amount: 0 },
+        ];
+        return weeklyReport.map(item => ({
+            day: item.weekday,
+            feedings: item.feedings,
+            amount: item.amount
+        }));
+    };
 
     return (
         <div className="history-page">
@@ -140,7 +168,12 @@ export default function History() {
                 )}
             </div>
 
-            {showChart && <WeeklyChart onClose={() => setShowChart(false)} />}
+            {showChart && (
+                <WeeklyChart 
+                    onClose={() => setShowChart(false)} 
+                    weeklyData={getWeeklyChartData()} 
+                />
+            )}
         </div>
     );
 }

@@ -1,11 +1,33 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import authService from '../services/authService';
+import userService from '../services/userService';
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+        useEffect(() => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                userService.getProfile()
+                    .then((res) => {
+                        if (res.user) {
+                            setUser(res.user);
+                        } else {
+                            setUser(res);
+                        }
+                    })
+                    .catch(() => {
+                        setUser(null);
+                        localStorage.removeItem('token');
+                    })
+                    .finally(() => setLoading(false));
+            } else {
+                setLoading(false);
+            }
+        }, []);
     const navigate = useNavigate();
 
 
@@ -20,7 +42,6 @@ export function AuthProvider({ children }) {
         }
     };
 
-
     const logout = () => {
         setUser(null);
         localStorage.removeItem('token');
@@ -29,6 +50,7 @@ export function AuthProvider({ children }) {
 
     const isAuthenticated = !!user;
 
+    if (loading) return null;
     return (
         <AuthContext.Provider value={{ user, login, logout, isAuthenticated }}>
             {children}

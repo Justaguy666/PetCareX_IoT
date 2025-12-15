@@ -1,3 +1,5 @@
+import authService from './authService';
+
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
 const getAuthHeader = () => {
@@ -5,7 +7,22 @@ const getAuthHeader = () => {
     return token ? { 'Authorization': `Bearer ${token}` } : {};
 };
 
-const handleResponse = async (response) => {
+const handleResponse = async (response, originalRequest) => {
+    if (response.status === 401 && originalRequest && !originalRequest._retry) {
+        originalRequest._retry = true;
+        try {
+            const refreshRes = await authService.refreshToken();
+            if (refreshRes && refreshRes.accessToken) {
+                localStorage.setItem('token', refreshRes.accessToken);
+                if (typeof originalRequest === 'function') {
+                    return await originalRequest();
+                }
+            }
+        } catch (e) {
+            localStorage.removeItem('token');
+        }
+        throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    }
     const data = await response.json();
     if (!response.ok) {
         throw new Error(data.message || 'Something went wrong');
@@ -14,113 +31,150 @@ const handleResponse = async (response) => {
 };
 
 class UserService {
+
     async getNewestFeeding() {
-        const response = await fetch(`${API_URL}/users/feeding/newest`, {
-            headers: { ...getAuthHeader() }
-        });
-        return handleResponse(response);
+        const doRequest = async () => {
+            const response = await fetch(`${API_URL}/users/feeding/newest`, {
+                headers: { ...getAuthHeader() }
+            });
+            return handleResponse(response, doRequest);
+        };
+        return doRequest();
     }
 
     async getNextFeeding() {
-        const response = await fetch(`${API_URL}/users/feeding/next`, {
-            headers: { ...getAuthHeader() }
-        });
-        return handleResponse(response);
+        const doRequest = async () => {
+            const response = await fetch(`${API_URL}/users/feeding/next`, {
+                headers: { ...getAuthHeader() }
+            });
+            return handleResponse(response, doRequest);
+        };
+        return doRequest();
     }
 
     async getSchedules() {
-        const response = await fetch(`${API_URL}/users/settings`, {
-            headers: { ...getAuthHeader() }
-        });
-        return handleResponse(response);
+        const doRequest = async () => {
+            const response = await fetch(`${API_URL}/users/settings`, {
+                headers: { ...getAuthHeader() }
+            });
+            return handleResponse(response, doRequest);
+        };
+        return doRequest();
     }
 
     async createSchedule(time) {
-        const response = await fetch(`${API_URL}/users/schedule`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...getAuthHeader()
-            },
-            body: JSON.stringify({ time })
-        });
-        return handleResponse(response);
+        const doRequest = async () => {
+            const response = await fetch(`${API_URL}/users/schedule`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeader()
+                },
+                body: JSON.stringify({ time })
+            });
+            return handleResponse(response, doRequest);
+        };
+        return doRequest();
     }
 
     async updateSchedule(oldTime, newTime, enabled) {
-        const response = await fetch(`${API_URL}/users/schedule`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                ...getAuthHeader()
-            },
-            body: JSON.stringify({ oldTime, newTime, enabled })
-        });
-        return handleResponse(response);
+        const doRequest = async () => {
+            const response = await fetch(`${API_URL}/users/schedule`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeader()
+                },
+                body: JSON.stringify({ oldTime, newTime, enabled })
+            });
+            return handleResponse(response, doRequest);
+        };
+        return doRequest();
     }
 
     async deleteSchedule(time) {
-        const response = await fetch(`${API_URL}/users/schedule`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                ...getAuthHeader()
-            },
-            body: JSON.stringify({ time })
-        });
-        return handleResponse(response);
+        const doRequest = async () => {
+            const response = await fetch(`${API_URL}/users/schedule`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeader()
+                },
+                body: JSON.stringify({ time })
+            });
+            return handleResponse(response, doRequest);
+        };
+        return doRequest();
     }
 
     async getStatistics() {
-        const response = await fetch(`${API_URL}/users/statistics`, {
-            headers: { ...getAuthHeader() }
-        });
-        return handleResponse(response);
+        const doRequest = async () => {
+            const response = await fetch(`${API_URL}/users/statistics`, {
+                headers: { ...getAuthHeader() }
+            });
+            return handleResponse(response, doRequest);
+        };
+        return doRequest();
     }
 
     async getWeeklyReport() {
-        const response = await fetch(`${API_URL}/users/weekly-report`, {
-            headers: { ...getAuthHeader() }
-        });
-        return handleResponse(response);
+        const doRequest = async () => {
+            const response = await fetch(`${API_URL}/users/weekly-report`, {
+                headers: { ...getAuthHeader() }
+            });
+            return handleResponse(response, doRequest);
+        };
+        return doRequest();
     }
 
     async getSettings() {
-        const response = await fetch(`${API_URL}/users/settings`, {
-            headers: { ...getAuthHeader() }
-        });
-        return handleResponse(response);
+        const doRequest = async () => {
+            const response = await fetch(`${API_URL}/users/settings`, {
+                headers: { ...getAuthHeader() }
+            });
+            return handleResponse(response, doRequest);
+        };
+        return doRequest();
     }
 
     async updateSettings(settings) {
-        const response = await fetch(`${API_URL}/users/settings`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                ...getAuthHeader()
-            },
-            body: JSON.stringify(settings)
-        });
-        return handleResponse(response);
+        const doRequest = async () => {
+            const response = await fetch(`${API_URL}/users/settings`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeader()
+                },
+                body: JSON.stringify(settings)
+            });
+            return handleResponse(response, doRequest);
+        };
+        return doRequest();
     }
 
     async getProfile() {
-        const response = await fetch(`${API_URL}/users/profile`, {
-            headers: { ...getAuthHeader() }
-        });
-        return handleResponse(response);
+        const doRequest = async () => {
+            const response = await fetch(`${API_URL}/users/profile`, {
+                headers: { ...getAuthHeader() }
+            });
+            return handleResponse(response, doRequest);
+        };
+        return doRequest();
     }
 
     async updateProfile(data) {
-        const response = await fetch(`${API_URL}/users/profile`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                ...getAuthHeader()
-            },
-            body: JSON.stringify(data)
-        });
-        return handleResponse(response);
+        const doRequest = async () => {
+            const response = await fetch(`${API_URL}/users/profile`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeader()
+                },
+                body: JSON.stringify(data)
+            });
+            return handleResponse(response, doRequest);
+        };
+        return doRequest();
     }
 }
 

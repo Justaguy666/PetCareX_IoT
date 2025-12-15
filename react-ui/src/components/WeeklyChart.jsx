@@ -1,19 +1,22 @@
 import { X } from 'lucide-react';
 
-export default function WeeklyChart({ onClose }) {
-    const weeklyData = [
-        { day: 'T2', feedings: 2, amount: 95 },
-        { day: 'T3', feedings: 2, amount: 100 },
-        { day: 'T4', feedings: 1, amount: 50 },
-        { day: 'T5', feedings: 2, amount: 90 },
-        { day: 'T6', feedings: 2, amount: 100 },
-        { day: 'T7', feedings: 2, amount: 95 },
-        { day: 'CN', feedings: 1, amount: 50 },
-    ];
 
-    const maxAmount = Math.max(...weeklyData.map(d => d.amount));
-    const totalAmount = weeklyData.reduce((sum, d) => sum + d.amount, 0);
-    const totalFeedings = weeklyData.reduce((sum, d) => sum + d.feedings, 0);
+export default function WeeklyChart({ onClose, weeklyData = [] }) {
+    const data = (weeklyData && weeklyData.length === 7)
+        ? weeklyData
+        : [
+            { day: 'T2', feedings: 0, amount: 0 },
+            { day: 'T3', feedings: 0, amount: 0 },
+            { day: 'T4', feedings: 0, amount: 0 },
+            { day: 'T5', feedings: 0, amount: 0 },
+            { day: 'T6', feedings: 0, amount: 0 },
+            { day: 'T7', feedings: 0, amount: 0 },
+            { day: 'CN', feedings: 0, amount: 0 },
+        ];
+
+    const maxAmount = Math.max(...data.map(d => d.amount));
+    const totalAmount = data.reduce((sum, d) => sum + d.amount, 0);
+    const totalFeedings = data.reduce((sum, d) => sum + d.feedings, 0);
     const avgPerDay = Math.round(totalAmount / 7);
 
     return (
@@ -27,16 +30,16 @@ export default function WeeklyChart({ onClose }) {
                 </div>
                 <div className="chart-container">
                     <div className="chart-bars">
-                        {weeklyData.map((data, index) => (
+                        {data.map((item, index) => (
                             <div key={index} className="chart-bar-wrapper">
-                                <div className="chart-bar-value">{data.amount}g</div>
+                                <div className="chart-bar-value">{item.amount}g</div>
                                 <div className="chart-bar-bg">
                                     <div 
                                         className="chart-bar-fill"
-                                        style={{ height: `${(data.amount / maxAmount) * 100}%` }}
+                                        style={{ height: `${maxAmount > 0 ? (item.amount / maxAmount) * 100 : 0}%` }}
                                     ></div>
                                 </div>
-                                <div className="chart-bar-label">{data.day}</div>
+                                <div className="chart-bar-label">{item.day}</div>
                             </div>
                         ))}
                     </div>
