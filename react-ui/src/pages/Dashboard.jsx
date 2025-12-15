@@ -1,10 +1,39 @@
+import { useState, useEffect } from 'react';
 import { Utensils, Droplets, Clock, AlarmClock } from 'lucide-react';
+import userService from '../services/userService';
 
 export default function Dashboard() {
-    const foodLevel = 75;
-    const waterLevel = 75;
-    const lastFedTime = "8:30 AM";
-    const nextFeedTime = "7:00 PM";
+    const [foodLevel, setFoodLevel] = useState(75);
+    const [waterLevel, setWaterLevel] = useState(75);
+    const [lastFedTime, setLastFedTime] = useState('--:--');
+    const [nextFeedTime, setNextFeedTime] = useState('--:--');
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [newestRes, nextRes] = await Promise.all([
+                    userService.getNewestFeeding(),
+                    userService.getNextFeeding()
+                ]);
+
+                if (newestRes.feeding) {
+                    const time = new Date(newestRes.feeding.time);
+                    setLastFedTime(time.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }));
+                }
+
+                if (nextRes.nextFeeding) {
+                    setNextFeedTime(nextRes.nextFeeding.time);
+                }
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     return (
         <div className="dashboard">
@@ -55,7 +84,9 @@ export default function Dashboard() {
                 </div>
                 <div className="info-content">
                     <span className="info-label last-fed-label">Lần cho ăn gần nhất</span>
-                    <span className="info-value last-fed-value">Đã cho ăn lúc {lastFedTime}</span>
+                    <span className="info-value last-fed-value">
+                        {loading ? 'Đang tải...' : `Đã cho ăn lúc ${lastFedTime}`}
+                    </span>
                 </div>
             </div>
 
@@ -66,7 +97,9 @@ export default function Dashboard() {
                 </div>
                 <div className="info-content">
                     <span className="info-label next-feed-label">Lịch cho ăn tiếp theo</span>
-                    <span className="info-value next-feed-value">Lần kế tiếp: {nextFeedTime}</span>
+                    <span className="info-value next-feed-value">
+                        {loading ? 'Đang tải...' : `Lần kế tiếp: ${nextFeedTime}`}
+                    </span>
                 </div>
             </div>
         </div>

@@ -1,23 +1,55 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Utensils } from 'lucide-react';
 import WeeklyChart from '../components/WeeklyChart';
+import userService from '../services/userService';
 
 export default function History() {
     const [activeFilter, setActiveFilter] = useState('all');
     const [showChart, setShowChart] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({
+        totalFeedings: 0,
+        successRate: 0,
+        avgAmount: 0,
+        missedFeedings: 0
+    });
+    const [historyItems, setHistoryItems] = useState([]);
 
-    const stats = {
-        totalFeedings: 12,
-        successRate: 92,
-        avgAmount: 47,
-        missedFeedings: 1
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            const statsRes = await userService.getStatistics();
+            setStats({
+                totalFeedings: statsRes.totalFeedings,
+                successRate: statsRes.successRate,
+                avgAmount: statsRes.totalFeedings > 0 
+                    ? Math.round(statsRes.totalAmount / statsRes.totalFeedings) 
+                    : 0,
+                missedFeedings: statsRes.missedFeedings
+            });
+
+            const settingsRes = await userService.getSchedules();
+            // History would come from a separate endpoint - for now mock with settings
+        } catch (error) {
+            console.error('Error fetching history:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const historyItems = [
-        { id: 1, time: '8:30 AM', amount: 50, date: 'Hôm nay', status: 'success' },
-        { id: 2, time: '6:00 PM', amount: 45, date: 'Hôm qua', status: 'success' },
-        { id: 3, time: '8:30 AM', amount: 50, date: 'Hôm qua', status: 'success' },
-    ];
+    const formatDate = (dateStr) => {
+        const date = new Date(dateStr);
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        if (date.toDateString() === today.toDateString()) return 'Hôm nay';
+        if (date.toDateString() === yesterday.toDateString()) return 'Hôm qua';
+        return date.toLocaleDateString('vi-VN');
+    };
 
     const filteredItems = historyItems.filter(item => {
         if (activeFilter === 'all') return true;
@@ -25,6 +57,10 @@ export default function History() {
         if (activeFilter === 'missed') return item.status === 'missed';
         return true;
     });
+
+    if (loading) {
+        return <div className="history-page"><p>Đang tải...</p></div>;
+    }
 
     return (
         <div className="history-page">
@@ -77,25 +113,31 @@ export default function History() {
             </div>
 
             <div className="history-list">
-                {filteredItems.map(item => (
-                    <div key={item.id} className="history-item">
-                        <div className="history-item-icon">
-                            <Utensils size={18} color="#059669" />
+                {filteredItems.length === 0 ? (
+                    <p style={{ textAlign: 'center', color: '#9CA3AF' }}>Chưa có lịch sử cho ăn</p>
+                ) : (
+                    filteredItems.map((item, index) => (
+                        <div key={index} className="history-item">
+                            <div className="history-item-icon">
+                                <Utensils size={18} color="#059669" />
+                            </div>
+                            <div className="history-item-info">
+                                <span className="history-time">
+                                    {new Date(item.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                                <span className="history-amount">
+                                    Lượng thức ăn: <strong>{item.amount}g</strong>
+                                </span>
+                            </div>
+                            <div className="history-item-meta">
+                                <span className="history-date">{formatDate(item.time)}</span>
+                                <span className={`history-status ${item.status}`}>
+                                    {item.status === 'success' ? 'Thành công' : 'Bỏ lỡ'}
+                                </span>
+                            </div>
                         </div>
-                        <div className="history-item-info">
-                            <span className="history-time">{item.time}</span>
-                            <span className="history-amount">
-                                Lượng thức ăn: <strong>{item.amount}g</strong>
-                            </span>
-                        </div>
-                        <div className="history-item-meta">
-                            <span className="history-date">{item.date}</span>
-                            <span className={`history-status ${item.status}`}>
-                                {item.status === 'success' ? 'Thành công' : 'Bỏ lỡ'}
-                            </span>
-                        </div>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
 
             {showChart && <WeeklyChart onClose={() => setShowChart(false)} />}

@@ -1,27 +1,56 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User, Pencil, LogOut, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/authContext';
 import EditEmailModal from '../components/EditEmailModal';
 import ChangePasswordModal from '../components/ChangePasswordModal';
 import ChangeAvatarModal from '../components/ChangeAvatarModal';
+import userService from '../services/userService';
 
 export default function PersonalInformation() {
     const { logout, user } = useAuth();
     const [showEditEmail, setShowEditEmail] = useState(false);
     const [showChangePassword, setShowChangePassword] = useState(false);
     const [showChangeAvatar, setShowChangeAvatar] = useState(false);
+    const [loading, setLoading] = useState(true);
     
-    const [email, setEmail] = useState(user?.email || 'nguyenvanan@gmail.com');
+    const [profile, setProfile] = useState({
+        username: '',
+        email: ''
+    });
 
-    const userInfo = {
-        name: user?.name || 'Nguyễn Văn An',
-        email: email,
-        password: '••••••••'
+    useEffect(() => {
+        fetchProfile();
+    }, []);
+
+    const fetchProfile = async () => {
+        try {
+            const res = await userService.getProfile();
+            setProfile({
+                username: res.user.username,
+                email: res.user.email
+            });
+        } catch (error) {
+            console.error('Error fetching profile:', error);
+            if (user) {
+                setProfile({
+                    username: user.username || user.name || 'User',
+                    email: user.email || ''
+                });
+            }
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleSaveEmail = (newEmail) => {
-        setEmail(newEmail);
-        setShowEditEmail(false);
+    const handleSaveEmail = async (newEmail) => {
+        try {
+            await userService.updateProfile({ email: newEmail });
+            setProfile(prev => ({ ...prev, email: newEmail }));
+            setShowEditEmail(false);
+        } catch (error) {
+            console.error('Error updating email:', error);
+            alert(error.message);
+        }
     };
 
     const handleSavePassword = (passwordData) => {
@@ -38,6 +67,10 @@ export default function PersonalInformation() {
         logout();
     };
 
+    if (loading) {
+        return <div className="profile-page"><p>Đang tải...</p></div>;
+    }
+
     return (
         <div className="profile-page">
             <div className="profile-card">
@@ -50,14 +83,14 @@ export default function PersonalInformation() {
                             <Pencil size={12} color="#059669" />
                         </button>
                     </div>
-                    <h3 className="profile-name">{userInfo.name}</h3>
+                    <h3 className="profile-name">{profile.username}</h3>
                 </div>
 
                 <div className="profile-info-list">
                     <div className="profile-info-item">
                         <div className="profile-info-content">
                             <span className="profile-info-label">Email</span>
-                            <span className="profile-info-value">{userInfo.email}</span>
+                            <span className="profile-info-value">{profile.email}</span>
                         </div>
                         <button className="profile-edit-btn" onClick={() => setShowEditEmail(true)}>
                             Chỉnh sửa
@@ -67,7 +100,7 @@ export default function PersonalInformation() {
                     <div className="profile-info-item">
                         <div className="profile-info-content">
                             <span className="profile-info-label">Mật khẩu</span>
-                            <span className="profile-info-value">{userInfo.password}</span>
+                            <span className="profile-info-value">••••••••</span>
                         </div>
                         <button className="profile-edit-btn" onClick={() => setShowChangePassword(true)}>
                             Đổi mật khẩu
@@ -86,7 +119,7 @@ export default function PersonalInformation() {
 
             {showEditEmail && (
                 <EditEmailModal
-                    currentEmail={email}
+                    currentEmail={profile.email}
                     onClose={() => setShowEditEmail(false)}
                     onSave={handleSaveEmail}
                 />

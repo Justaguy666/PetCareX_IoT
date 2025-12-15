@@ -1,42 +1,73 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AlarmClock, Plus, X } from 'lucide-react';
+import userService from '../services/userService';
 
 export default function Schedule() {
-    const [schedules, setSchedules] = useState([
-        { id: 1, time: '7:00 AM', enabled: false },
-        { id: 2, time: '00:00 PM', enabled: false },
-        { id: 3, time: '04:00 PM', enabled: false },
-    ]);
-
+    const [schedules, setSchedules] = useState([]);
     const [showAddModal, setShowAddModal] = useState(false);
     const [newTime, setNewTime] = useState('12:00');
+    const [loading, setLoading] = useState(true);
 
-    const toggleSchedule = (id) => {
-        setSchedules(prev => 
-            prev.map(s => s.id === id ? { ...s, enabled: !s.enabled } : s)
-        );
-    };
+    useEffect(() => {
+        fetchSchedules();
+    }, []);
 
-    const deleteSchedule = (id) => {
-        setSchedules(prev => prev.filter(s => s.id !== id));
-    };
-
-    const addSchedule = () => {
-        if (newTime) {
-            const [hours, minutes] = newTime.split(':');
-            const hour = parseInt(hours);
-            const period = hour >= 12 ? 'PM' : 'AM';
-            const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
-            const formattedTime = `${displayHour.toString().padStart(2, '0')}:${minutes} ${period}`;
-            
-            setSchedules(prev => [
-                ...prev,
-                { id: Date.now(), time: formattedTime, enabled: true }
-            ]);
-            setShowAddModal(false);
-            setNewTime('12:00');
+    const fetchSchedules = async () => {
+        try {
+            const res = await userService.getSchedules();
+            setSchedules(res.schedule || []);
+        } catch (error) {
+            console.error('Error fetching schedules:', error);
+        } finally {
+            setLoading(false);
         }
     };
+
+    const toggleSchedule = async (time, currentEnabled) => {
+        try {
+            await userService.updateSchedule(time, null, !currentEnabled);
+            setSchedules(prev => 
+                prev.map(s => s.time === time ? { ...s, enabled: !currentEnabled } : s)
+            );
+        } catch (error) {
+            console.error('Error toggling schedule:', error);
+        }
+    };
+
+    const deleteSchedule = async (time) => {
+        try {
+            await userService.deleteSchedule(time);
+            setSchedules(prev => prev.filter(s => s.time !== time));
+        } catch (error) {
+            console.error('Error deleting schedule:', error);
+        }
+    };
+
+    const addSchedule = async () => {
+        if (newTime) {
+            try {
+                const res = await userService.createSchedule(newTime);
+                setSchedules(res.schedule || []);
+                setShowAddModal(false);
+                setNewTime('12:00');
+            } catch (error) {
+                console.error('Error adding schedule:', error);
+                alert(error.message);
+            }
+        }
+    };
+
+    const formatTime = (time) => {
+        const [hours, minutes] = time.split(':');
+        const hour = parseInt(hours);
+        const period = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
+        return `${displayHour.toString().padStart(2, '0')}:${minutes} ${period}`;
+    };
+
+    if (loading) {
+        return <div className="schedule-page"><p>Đang tải...</p></div>;
+    }
 
     return (
         <div className="schedule-page">
@@ -46,23 +77,23 @@ export default function Schedule() {
             </button>
 
             <div className="schedule-list">
-                {schedules.map(schedule => (
-                    <div key={schedule.id} className="schedule-item">
+                {schedules.map((schedule, index) => (
+                    <div key={index} className="schedule-item">
                         <div className="schedule-icon">
                             <AlarmClock size={24} color="#FFFFFF" />
                         </div>
-                        <span className="schedule-time">{schedule.time}</span>
+                        <span className="schedule-time">{formatTime(schedule.time)}</span>
                         <label className="schedule-toggle">
                             <input 
                                 type="checkbox" 
                                 checked={schedule.enabled}
-                                onChange={() => toggleSchedule(schedule.id)}
+                                onChange={() => toggleSchedule(schedule.time, schedule.enabled)}
                             />
                             <span className="toggle-slider"></span>
                         </label>
                         <button 
                             className="schedule-delete"
-                            onClick={() => deleteSchedule(schedule.id)}
+                            onClick={() => deleteSchedule(schedule.time)}
                         >
                             <X size={16} color="#FFFFFF" />
                         </button>

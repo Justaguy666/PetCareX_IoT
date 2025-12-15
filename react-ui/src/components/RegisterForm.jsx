@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import authService from '../services/authService';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -31,6 +32,8 @@ const registerSchema = z.object({
 export default function RegisterForm({ setView }) {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [formError, setFormError] = useState('');
+    const [formSuccess, setFormSuccess] = useState('');
 
     const {
         register,
@@ -47,10 +50,14 @@ export default function RegisterForm({ setView }) {
     });
 
     const onSubmit = async (data) => {
+        setFormError('');
+        setFormSuccess('');
         try {
-            console.log('Register data:', data);
+            await authService.register(data.name, data.email, data.password);
+            setFormSuccess('Đăng ký thành công! Vui lòng đăng nhập.');
+            setTimeout(() => setView('login'), 1200);
         } catch (error) {
-            console.error('Register error:', error);
+            setFormError(error.message || 'Đăng ký thất bại');
         }
     };
 
@@ -83,6 +90,8 @@ export default function RegisterForm({ setView }) {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit(onSubmit)} className="login-form">
+                    {formError && <div className="form-error" style={{ textAlign: 'center' }}>{formError}</div>}
+                    {formSuccess && <div className="form-success" style={{ textAlign: 'center', color: '#059669' }}>{formSuccess}</div>}
                     {/* Name Field */}
                     <div className="form-group">
                         <label htmlFor="name" className="form-label">

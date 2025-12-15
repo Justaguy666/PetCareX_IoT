@@ -1,22 +1,70 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Utensils, AlertTriangle, Calendar } from 'lucide-react';
+import userService from '../services/userService';
 
 export default function Settings() {
-    const [mode, setMode] = useState('auto');
+    const [mode, setMode] = useState('manual');
     const [notifications, setNotifications] = useState({
-        general: true,
-        foodLow: true,
-        waterLow: false,
-        scheduleReminder: false
+        feeding: true,
+        lack_of_food: true,
+        lack_of_water: false,
+        feeding_in_next_15_minutes: false
     });
     const [foodAmount, setFoodAmount] = useState(75);
+    const [loading, setLoading] = useState(true);
 
-    const toggleNotification = (key) => {
-        setNotifications(prev => ({
-            ...prev,
-            [key]: !prev[key]
-        }));
+    useEffect(() => {
+        fetchSettings();
+    }, []);
+
+    const fetchSettings = async () => {
+        try {
+            const res = await userService.getSettings();
+            const config = res.configurations;
+            setMode(config.is_automatic ? 'auto' : 'manual');
+            setNotifications(config.notifications);
+            setFoodAmount(config.food_amount);
+        } catch (error) {
+            console.error('Error fetching settings:', error);
+        } finally {
+            setLoading(false);
+        }
     };
+
+    const handleModeChange = async (newMode) => {
+        setMode(newMode);
+        try {
+            await userService.updateSettings({ is_automatic: newMode === 'auto' });
+        } catch (error) {
+            console.error('Error updating mode:', error);
+        }
+    };
+
+    const toggleNotification = async (key) => {
+        const newValue = !notifications[key];
+        setNotifications(prev => ({ ...prev, [key]: newValue }));
+        try {
+            await userService.updateSettings({ notifications: { [key]: newValue } });
+        } catch (error) {
+            console.error('Error updating notification:', error);
+        }
+    };
+
+    const handleFoodAmountChange = async (value) => {
+        setFoodAmount(value);
+    };
+
+    const handleFoodAmountBlur = async () => {
+        try {
+            await userService.updateSettings({ food_amount: foodAmount });
+        } catch (error) {
+            console.error('Error updating food amount:', error);
+        }
+    };
+
+    if (loading) {
+        return <div className="settings-page"><p>Đang tải...</p></div>;
+    }
 
     return (
         <div className="settings-page">
@@ -26,13 +74,13 @@ export default function Settings() {
                 <div className="mode-toggle">
                     <button 
                         className={`mode-btn left ${mode === 'auto' ? 'active' : ''}`}
-                        onClick={() => setMode('auto')}
+                        onClick={() => handleModeChange('auto')}
                     >
                         Tự động
                     </button>
                     <button 
                         className={`mode-btn right ${mode === 'manual' ? 'active' : ''}`}
-                        onClick={() => setMode('manual')}
+                        onClick={() => handleModeChange('manual')}
                     >
                         Thủ công
                     </button>
@@ -54,8 +102,8 @@ export default function Settings() {
                         <label className="settings-toggle">
                             <input 
                                 type="checkbox" 
-                                checked={notifications.general}
-                                onChange={() => toggleNotification('general')}
+                                checked={notifications.feeding}
+                                onChange={() => toggleNotification('feeding')}
                             />
                             <span className="settings-toggle-slider"></span>
                         </label>
@@ -72,8 +120,8 @@ export default function Settings() {
                         <label className="settings-toggle">
                             <input 
                                 type="checkbox" 
-                                checked={notifications.foodLow}
-                                onChange={() => toggleNotification('foodLow')}
+                                checked={notifications.lack_of_food}
+                                onChange={() => toggleNotification('lack_of_food')}
                             />
                             <span className="settings-toggle-slider"></span>
                         </label>
@@ -90,8 +138,8 @@ export default function Settings() {
                         <label className="settings-toggle">
                             <input 
                                 type="checkbox" 
-                                checked={notifications.waterLow}
-                                onChange={() => toggleNotification('waterLow')}
+                                checked={notifications.lack_of_water}
+                                onChange={() => toggleNotification('lack_of_water')}
                             />
                             <span className="settings-toggle-slider"></span>
                         </label>
@@ -108,8 +156,8 @@ export default function Settings() {
                         <label className="settings-toggle">
                             <input 
                                 type="checkbox" 
-                                checked={notifications.scheduleReminder}
-                                onChange={() => toggleNotification('scheduleReminder')}
+                                checked={notifications.feeding_in_next_15_minutes}
+                                onChange={() => toggleNotification('feeding_in_next_15_minutes')}
                             />
                             <span className="settings-toggle-slider"></span>
                         </label>
@@ -132,7 +180,9 @@ export default function Settings() {
                             min="25"
                             max="125"
                             value={foodAmount}
-                            onChange={(e) => setFoodAmount(Number(e.target.value))}
+                            onChange={(e) => handleFoodAmountChange(Number(e.target.value))}
+                            onMouseUp={handleFoodAmountBlur}
+                            onTouchEnd={handleFoodAmountBlur}
                             className="food-slider-input"
                         />
                     </div>

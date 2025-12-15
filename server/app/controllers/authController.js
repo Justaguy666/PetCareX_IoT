@@ -62,7 +62,7 @@ class AuthController {
                         .json({ error: 'Vui lòng điền đầy đủ thông tin' });
             }
 
-            const user = await  User.findOne({ email: String(email).toLowerCase().trim() })
+            const user = await  User.findOne({ email: String(email).toLowerCase().trim() }).select('+password');
             if(!user) {
                 return res
                         .status(401)

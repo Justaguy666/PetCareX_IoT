@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import RequireAuth from './components/RequireAuth.jsx';
 import { PawPrint, Calendar, BarChart3, Settings as SettingsIcon, User } from 'lucide-react';
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -17,68 +18,79 @@ export default function App() {
         element={<Login />} 
       />
 
-      <Route 
+
+      <Route
         path="/"
         element={
-          <MainLayout 
-            title="Máy Chăm Sóc Thú Cưng" 
-            intro="Chăm sóc thú cưng của bạn"
-            Icon={PawPrint}
-          >
-            <Dashboard />
-          </MainLayout>
+          <RequireAuth>
+            <MainLayout 
+              title="Máy Chăm Sóc Thú Cưng" 
+              intro="Chăm sóc thú cưng của bạn"
+              Icon={PawPrint}
+            >
+              <Dashboard />
+            </MainLayout>
+          </RequireAuth>
         }
       />
 
       <Route
         path="/schedule"
         element={
-          <MainLayout 
-            title="Lịch Trình" 
-            intro="Quản lý lịch cho ăn tự động"
-            Icon={Calendar}
-          >
-            <Schedule />
-          </MainLayout>
+          <RequireAuth>
+            <MainLayout 
+              title="Lịch Trình" 
+              intro="Quản lý lịch cho ăn tự động"
+              Icon={Calendar}
+            >
+              <Schedule />
+            </MainLayout>
+          </RequireAuth>
         }
       />
       
       <Route
         path="/history"
         element={
-          <MainLayout 
-            title="Lịch Sử" 
-            intro="Theo dõi hoạt động của máy"
-            Icon={BarChart3}
-          >
-            <History />
-          </MainLayout>
+          <RequireAuth>
+            <MainLayout 
+              title="Lịch Sử" 
+              intro="Theo dõi hoạt động của máy"
+              Icon={BarChart3}
+            >
+              <History />
+            </MainLayout>
+          </RequireAuth>
         }
       />
 
       <Route
         path="/settings"
         element={
-          <MainLayout 
-            title="Thiết Lập" 
-            intro="Cấu hình máy chăm sóc thú cưng"
-            Icon={SettingsIcon}
-          >
-            <Settings />
-          </MainLayout>
+          <RequireAuth>
+            <MainLayout 
+              title="Thiết Lập" 
+              intro="Cấu hình máy chăm sóc thú cưng"
+              Icon={SettingsIcon}
+            >
+              <Settings />
+            </MainLayout>
+          </RequireAuth>
         }
       />
 
       <Route
         path="/personal-information"
         element={
-          <MainLayout 
-            title="Thông Tin Cá Nhân" 
-            intro="Quản lý tài khoản của bạn"
-            Icon={User}
-          >
-            <PersonalInformation />
-          </MainLayout>
+          <RequireAuth>
+            <MainLayout 
+              title="Thông Tin Cá Nhân" 
+              intro="Quản lý tài khoản của bạn"
+              Icon={User}
+            >
+              <PersonalInformation />
+            </MainLayout>
+          </RequireAuth>
         }
       />
 
