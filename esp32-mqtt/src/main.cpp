@@ -1,52 +1,113 @@
+#include <Arduino.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include <ESP32Servo.h>
 
+/* ================= PIN ================= */
+#define TRIG_WATER   4
+#define ECHO_WATER   16
+
+#define TRIG_FOOD    5
+#define ECHO_FOOD    18
+
+#define SERVO_PIN    13
+#define RELAY_PIN    19
+#define LED_STATUS   17
+#define BTN_FEED     27
+
+/* ================= CONFIG ================= */
+#define TANK_HEIGHT_CM   20.0
+#define FOOD_HEIGHT_CM  15.0
+
+/* ================= WIFI ================= */
 const char* ssid = "Wokwi-GUEST";
 const char* password = "";
 
+/* ================= MQTT ================= */
 const char* mqtt_server = "q8a52061.ala.dedicated.aws.emqxcloud.com";
-const int mqtt_port = 1883;
+const int   mqtt_port   = 1883;
+const char* mqtt_user   = "vinhok_123";
+const char* mqtt_pass   = "123456";
 
-const char* mqtt_user = "vinhok_123";
-const char* mqtt_pass = "123456";
+#define TOPIC_STATUS   "petcarex/status"
+#define TOPIC_SENSOR   "petcarex/sensor"
+#define TOPIC_COMMAND  "petcarex/command"
 
+/* ================= OBJECT ================= */
 WiFiClient espClient;
 PubSubClient client(espClient);
+Servo feeder;
 
-void callback(char* topic, byte* message, unsigned int length) {
-  Serial.print("Message [");
-  Serial.print(topic);
-  Serial.print("]: ");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)message[i]);
-  }
-  Serial.println();
+/* ================= FUNCTION ================= */
+float readDistanceCM(int trigPin, int echoPin) {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH, 30000);
+  if (duration == 0) return -1;
+
+  return duration * 0.034 / 2;
+}
+
+int calcPercent(float distance, float height) {
+  if (distance < 0) return 0;
+  float level = height - distance;
+  int percent = (level / height) * 100;
+  return constrain(percent, 0, 100);
+}
+
+void feedPet() {
+  Serial.println("Feeding pet...");
+  feeder.write(90);
+  delay(1500);
+  feeder.write(0);
 }
 
 void setup_wifi() {
-  delay(10);
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-
+  Serial.print("Connecting WiFi");
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
+    delay(500);
     Serial.print(".");
   }
-
-  Serial.println("\nWiFi connected!");
+  Serial.println("\nWiFi connected");
 }
 
-void reconnect() {
+void mqttCallback(char* topic, byte* payload, unsigned int length) {
+  String msg;
+  for (int i = 0; i < length; i++) {
+    msg += (char)payload[i];
+  }
+
+  Serial.print("MQTT [");
+  Serial.print(topic);
+  Serial.print("] ");
+  Serial.println(msg);
+
+  if (String(topic) == TOPIC_COMMAND) {
+    if (msg == "FEED") {
+      feedPet();
+    }
+    if (msg == "PUMP_ON") {
+      digitalWrite(RELAY_PIN, HIGH);
+    }
+    if (msg == "PUMP_OFF") {
+      digitalWrite(RELAY_PIN, LOW);
+    }
+  }
+}
+
+void reconnectMQTT() {
   while (!client.connected()) {
-    Serial.print("Connecting to MQTT...");
-    
-    // connect(clientID, username, password)
-    if (client.connect("esp32-client", mqtt_user, mqtt_pass)) {
-      Serial.println("connected!");
-      client.subscribe("petcarex/command");
+    Serial.print("Connecting MQTT...");
+    if (client.connect("esp32-petcarex", mqtt_user, mqtt_pass)) {
+      Serial.println("connected");
+      client.subscribe(TOPIC_COMMAND);
+      client.publish(TOPIC_STATUS, "ESP32 Online");
     } else {
       Serial.print("failed, rc=");
       Serial.println(client.state());
@@ -55,20 +116,73 @@ void reconnect() {
   }
 }
 
+/* ================= SETUP ================= */
 void setup() {
   Serial.begin(115200);
+
+  pinMode(TRIG_WATER, OUTPUT);
+  pinMode(ECHO_WATER, INPUT);
+  pinMode(TRIG_FOOD, OUTPUT);
+  pinMode(ECHO_FOOD, INPUT);
+
+  pinMode(RELAY_PIN, OUTPUT);
+  pinMode(LED_STATUS, OUTPUT);
+  pinMode(BTN_FEED, INPUT_PULLUP);
+
+  digitalWrite(RELAY_PIN, LOW);
+  digitalWrite(LED_STATUS, HIGH);
+
+  feeder.attach(SERVO_PIN);
+  feeder.write(0);
+
   setup_wifi();
 
   client.setServer(mqtt_server, mqtt_port);
-  client.setCallback(callback);
+  client.setCallback(mqttCallback);
+
+  Serial.println("PetCareX ESP32 started");
 }
 
+/* ================= LOOP ================= */
 void loop() {
   if (!client.connected()) {
-    reconnect();
+    reconnectMQTT();
   }
   client.loop();
-  Serial.println("Hello World!");
-  client.publish("petcarex/status", "ESP32 Alive!");
+
+  /* ---- Read sensors ---- */
+  float distWater = readDistanceCM(TRIG_WATER, ECHO_WATER);
+  float distFood  = readDistanceCM(TRIG_FOOD, ECHO_FOOD);
+
+  int waterPercent = calcPercent(distWater, TANK_HEIGHT_CM);
+  int foodPercent  = calcPercent(distFood, FOOD_HEIGHT_CM);
+
+  /* ---- Publish sensor ---- */
+  char payload[100];
+  snprintf(payload, sizeof(payload),
+           "{\"water\":%d,\"food\":%d}",
+           waterPercent, foodPercent);
+
+  client.publish(TOPIC_SENSOR, payload);
+
+  /* ---- Auto pump ---- */
+  if (waterPercent < 30) {
+    digitalWrite(RELAY_PIN, HIGH);
+  } else {
+    digitalWrite(RELAY_PIN, LOW);
+  }
+
+  /* ---- Auto feed ---- */
+  if (foodPercent < 20) {
+    feedPet();
+    delay(5000);
+  }
+
+  /* ---- Manual feed ---- */
+  if (digitalRead(BTN_FEED) == LOW) {
+    feedPet();
+    delay(2000);
+  }
+
   delay(3000);
 }

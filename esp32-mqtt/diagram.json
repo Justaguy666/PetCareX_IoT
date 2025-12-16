@@ -10,55 +10,111 @@
       "left": -179.6,
       "attrs": { "color": "#eeefed" }
     },
-    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 115.2, "left": -167.96, "attrs": {} },
     {
-      "type": "wokwi-led",
-      "id": "led1",
-      "top": -118.8,
-      "left": -101.8,
-      "attrs": { "color": "red" }
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": 115.2,
+      "left": -167.96
     },
     {
-      "type": "wokwi-pushbutton-6mm",
-      "id": "btn1",
-      "top": -37.4,
-      "left": -140,
-      "rotate": 90,
-      "attrs": { "color": "red", "xray": "1" }
+      "type": "wokwi-hc-sr04",
+      "id": "ultrasonic1",
+      "top": -248.1,
+      "left": -90.5
     },
-    { "type": "wokwi-hc-sr04", "id": "ultrasonic1", "top": -248.1, "left": -90.5, "attrs": {} },
-    { "type": "wokwi-hc-sr04", "id": "ultrasonic2", "top": -209.7, "left": 485.5, "attrs": {} },
     {
-      "type": "wokwi-resistor",
-      "id": "r1",
-      "top": 147.95,
-      "left": -19.2,
-      "attrs": { "value": "1000" }
+      "type": "wokwi-hc-sr04",
+      "id": "ultrasonic2",
+      "top": -286.5,
+      "left": 312.7
     },
     {
       "type": "wokwi-servo",
       "id": "servo1",
       "top": -298.6,
       "left": 69,
-      "rotate": 270,
-      "attrs": {}
+      "rotate": 270
     },
-    { "type": "wokwi-led", "id": "led2", "top": -99.6, "left": 599, "attrs": { "color": "blue" } },
-    { "type": "wokwi-relay-module", "id": "relay1", "top": -28.6, "left": 528, "attrs": {} }
+    {
+      "type": "wokwi-relay-module",
+      "id": "relay1",
+      "top": -28.6,
+      "left": 528
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ledStatus",
+      "top": -51.6,
+      "left": -63.4,
+      "attrs": { "color": "red" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ledPump",
+      "top": -30,
+      "left": 717,
+      "rotate": 90,
+      "attrs": { "color": "blue" }
+    },
+    {
+      "type": "wokwi-pushbutton-6mm",
+      "id": "btn1",
+      "top": -37.4,
+      "left": -120.8,
+      "rotate": 90
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "rStatus",
+      "top": -20,
+      "left": -30,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "rPump",
+      "top": 32.75,
+      "left": 662.4,
+      "attrs": { "value": "220" }
+    }
   ],
   "connections": [
     [ "esp:TX", "$serialMonitor:RX", "", [] ],
     [ "esp:RX", "$serialMonitor:TX", "", [] ],
-    [ "bb1:bp.1", "esp:3V3", "red", [ "v-0.9", "h-58.4", "v86.4" ] ],
-    [ "bb1:tp.50", "bb1:bp.50", "red", [ "v0.3", "h56.8", "v172.8" ] ],
-    [ "esp:GND.1", "bb1:bn.1", "black", [ "h-19.05", "v-201.6" ] ],
-    [ "bb1:bn.50", "bb1:tn.50", "black", [ "v-1.3", "h47.2", "v-172.8" ] ],
-    [ "btn1:1.l", "bb1:5t.e", "", [ "$bb" ] ],
-    [ "btn1:2.l", "bb1:3t.e", "", [ "$bb" ] ],
-    [ "btn1:1.r", "bb1:5b.f", "", [ "$bb" ] ],
-    [ "btn1:2.r", "bb1:3b.f", "", [ "$bb" ] ],
-    [ "led1:A", "bb1:9t.a", "", [ "$bb" ] ],
-    [ "led1:C", "bb1:8t.a", "", [ "$bb" ] ]
-  ],
-  "dependencies": {}
+    
+    ["esp:3V3", "bb1:bp.1", "red"],
+    ["esp:GND.1", "bb1:bn.1", "black"],
+    ["bb1:bp.50", "bb1:tp.50", "red"],
+    ["bb1:bn.50", "bb1:tn.50", "black"],
+
+    ["ultrasonic1:VCC", "bb1:tp.1", "red"],
+    ["ultrasonic1:GND", "bb1:tn.2", "black"],
+    ["ultrasonic1:TRIG", "esp:4", "green"],
+    ["ultrasonic1:ECHO", "esp:16", "green"],
+
+    ["ultrasonic2:VCC", "bb1:tp.46", "red"],
+    ["ultrasonic2:GND", "bb1:tn.49", "black"],
+    ["ultrasonic2:TRIG", "esp:5", "green"],
+    ["ultrasonic2:ECHO", "esp:18", "green"],
+
+    ["servo1:V+", "bb1:tp.26", "red"],
+    ["servo1:GND", "bb1:tn.26", "black"],
+    ["servo1:PWM", "esp:13", "green"],
+
+    ["relay1:VCC", "esp:5V", "red"],
+    ["relay1:GND", "bb1:bn.42", "black"],
+    ["relay1:IN", "esp:19", "green"],
+
+    ["relay1:COM", "bb1:bp.41", "red"],
+    ["relay1:NO", "rPump:1", "black"],
+    ["rPump:2", "ledPump:A", "black"],
+    ["ledPump:C", "bb1:bn.41", "black"],
+
+    ["esp:17", "rStatus:1", "green"],
+    ["rStatus:2", "ledStatus:A", "green"],
+    ["ledStatus:C", "bb1:bn.10", "black"],
+
+    ["btn1:1.l", "bb1:bn.5", "black"],
+    ["btn1:2.l", "esp:27", "green"]
+  ]
 }
