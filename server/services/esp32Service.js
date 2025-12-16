@@ -32,22 +32,14 @@ export function initEsp32Mqtt() {
         break;
       case TOPICS.STATUS:
         esp32Store.latestStatus = value;
+        console.log(`[MQTT] Status update: ${value}`);
         try {
-          let statusRaw = String(value);
-          try {
-            const parsed = JSON.parse(statusRaw);
-            if (parsed && parsed.status) statusRaw = parsed.status;
-          } catch (e) {
-          }
-
-          const normalized = String(statusRaw).toLowerCase().includes('status') ? 'missed' : 'success';
-
           const users = await User.find({});
           await Promise.all(users.map(async (user) => {
             const newEntry = {
               time: new Date(),
               amount: user.configurations?.food_amount ?? 0,
-              status: normalized
+              status: value
             };
             user.history.push(newEntry);
             await user.save();
