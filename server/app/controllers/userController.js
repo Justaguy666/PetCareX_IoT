@@ -302,14 +302,14 @@ class UserController {
             
             if (username) {
                 if (username.length < 6 || username.length > 20) {
-                    return res.status(400).json({ message: 'Username must be 6-20 characters' });
+                    return res.status(400).json({ message: 'Tên người dùng phải từ 6-20 kí tự' });
                 }
                 updateFields.username = username.trim();
             }
             
             if (email) {
                 if (!/^\S+@\S+\.\S+$/.test(email)) {
-                    return res.status(400).json({ message: 'Invalid email format' });
+                    return res.status(400).json({ message: 'Email sai định dạng' });
                 }
                 updateFields.email = email.toLowerCase().trim();
             }
@@ -320,10 +320,10 @@ class UserController {
                 { new: true, select: 'username email' }
             );
             
-            res.json({ message: 'Profile updated', user });
+            res.json({ message: 'Cập nhật profile thành công', user });
         } catch (e) {
             if (e.code === 11000) {
-                return res.status(400).json({ message: 'Username or email already exists' });
+                return res.status(400).json({ message: 'Email đã tồn tại trong hệ thống' });
             }
             console.error('Error updating user profile:', e);
             res.status(500).json({ message: 'Internal server error' });

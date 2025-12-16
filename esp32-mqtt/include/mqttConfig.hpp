@@ -14,3 +14,4 @@ extern const char* mqtt_pass;
 #define TOPIC_COMMAND      "petcarex/command"
 #define TOPIC_IS_AUTO      "petcarex/is_auto"
 #define TOPIC_SCHEDULE     "petcarex/schedule"
+#define TOPIC_FOOD_AMOUNT  "petcarex/food_amount"

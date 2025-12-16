@@ -1,5 +1,6 @@
 import express from 'express';
 import AuthController from '../app/controllers/authController.js';
+import authMiddleware from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ router.post('/logout', AuthController.logout);
 // [POST] /api/auth/forgotPassword
 router.post('/forgot-password', AuthController.forgotPassword);
 
-// [POST] /api/auth/changePassword
-router.post('/change-password', AuthController.changePassword);
+// [PATCH] /api/auth/changePassword
+router.patch('/change-password', authMiddleware, AuthController.changePassword);
 
 export default router;

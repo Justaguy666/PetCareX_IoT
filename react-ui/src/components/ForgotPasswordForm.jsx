@@ -3,6 +3,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ArrowLeft, PawPrint, CheckCircle } from 'lucide-react';
+import { toast } from "react-toastify";
+import authService from "../services/authService";
 
 // Zod validation schema
 const forgotPasswordSchema = z.object({
@@ -28,7 +30,8 @@ export default function ForgotPasswordForm({ setView }) {
 
     const onSubmit = async (data) => {
         try {
-            console.log('Forgot password data:', data);
+            const { email } = data;
+            await authService.forgotPassword(email);
             setIsSubmitted(true);
         } catch (error) {
             console.error('Forgot password error:', error);

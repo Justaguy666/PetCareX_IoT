@@ -21,7 +21,7 @@ const handleResponse = async (response, originalRequest) => {
     }
     const data = await response.json();
     if (!response.ok) {
-        throw new Error(data.message || 'Something went wrong');
+        throw new Error(data.message || data.error || 'Something went wrong');
     }
     return data;
 };
@@ -172,6 +172,22 @@ class UserService {
         const doRequest = async () => {
             const response = await fetch(`${API_URL}/users/profile`, {
                 method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeader()
+                },
+                body: JSON.stringify(data),
+                credentials: 'include'
+            });
+            return handleResponse(response, doRequest);
+        };
+        return doRequest();
+    }
+
+    async changePassword(data) {
+        const doRequest = async () => {
+            const response = await fetch(`${API_URL}/auth/change-password`, {
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                     ...getAuthHeader()
