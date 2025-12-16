@@ -15,7 +15,7 @@ const handleResponse = async (response, originalRequest) => {
     originalRequest._retry = true;
     try {
       const refreshRes = await authService.refreshToken();
-      if (refreshRes?.accessToken) {
+      if (refreshRes?.AccessToken) {
         return await originalRequest();
       }
     } catch (e) {

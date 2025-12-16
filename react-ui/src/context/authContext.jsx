@@ -9,7 +9,14 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
+
   useEffect(() => {
+    if (!initialized) {
+      setLoading(false);
+      return;
+    }
+
     userService
       .getProfile()
       .then((res) => {
@@ -21,16 +28,16 @@ export function AuthProvider({ children }) {
       })
       .catch(() => {
         setUser(null);
-        localStorage.removeItem("token");
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [initialized]);
   const navigate = useNavigate();
 
   const login = async (email, password) => {
     try {
       const res = await authService.login(email, password);
       setUser({ id: res.data.id });
+      setInitialized(true);
       navigate("/");
       toast.success(res?.message || "Đăng nhập thành công");
     } catch (error) {
@@ -53,7 +60,9 @@ export function AuthProvider({ children }) {
     try {
         await authService.logout();
     } catch {}
+
     setUser(null);
+    setInitialized(false);
     navigate("/login");
   };
 

@@ -2,16 +2,14 @@ import authService from './authService';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
-const getAuthHeader = () => {
-    return token ? { 'Authorization': `Bearer ${token}` } : {};
-};
+const getAuthHeader = () => {};
 
 const handleResponse = async (response, originalRequest) => {
     if (response.status === 401 && originalRequest && !originalRequest._retry) {
         originalRequest._retry = true;
         try {
             const refreshRes = await authService.refreshToken();
-            if (refreshRes && refreshRes.accessToken) {
+            if (refreshRes && refreshRes.AccessToken) {
                 if (typeof originalRequest === 'function') {
                     return await originalRequest();
                 }
