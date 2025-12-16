@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { AlarmClock, Plus, X } from 'lucide-react';
 import userService from '../services/userService';
+import esp32Service from '../services/esp32Service';
 
 export default function Schedule() {
     const [schedules, setSchedules] = useState([]);
@@ -25,10 +26,14 @@ export default function Schedule() {
 
     const toggleSchedule = async (time, currentEnabled) => {
         try {
-            await userService.updateSchedule(time, null, !currentEnabled);
-            setSchedules(prev => 
-                prev.map(s => s.time === time ? { ...s, enabled: !currentEnabled } : s)
+            const updatedSchedules = schedules.map(s => 
+                s.time === time ? { ...s, enabled: !currentEnabled } : s
             );
+
+            await esp32Service.changeSchedule(updatedSchedules);
+            await userService.updateSchedule(time, null, !currentEnabled);
+
+            setSchedules(updatedSchedules);
         } catch (error) {
             console.error('Error toggling schedule:', error);
         }
@@ -38,6 +43,7 @@ export default function Schedule() {
         try {
             await userService.deleteSchedule(time);
             setSchedules(prev => prev.filter(s => s.time !== time));
+            await esp32Service.changeSchedule(schedules);
         } catch (error) {
             console.error('Error deleting schedule:', error);
         }
@@ -50,6 +56,7 @@ export default function Schedule() {
                 setSchedules(res.schedule || []);
                 setShowAddModal(false);
                 setNewTime('12:00');
+                await esp32Service.changeSchedule(res.schedule || []);
             } catch (error) {
                 console.error('Error adding schedule:', error);
                 alert(error.message);

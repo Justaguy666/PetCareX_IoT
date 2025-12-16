@@ -24,6 +24,7 @@ export default function History() {
     const fetchData = async () => {
         try {
             const statsRes = await userService.getStatistics();
+            setHistoryItems(statsRes.history || []);
             setStats({
                 totalFeedings: statsRes.totalFeedings,
                 successRate: statsRes.successRate,
@@ -33,7 +34,9 @@ export default function History() {
                 missedFeedings: statsRes.missedFeedings
             });
 
-            const settingsRes = await userService.getSchedules();
+            const historyRes = await userService.getHistory();
+            setHistoryItems(historyRes.history || []);
+
         } catch (error) {
             console.error('Error fetching history:', error);
         } finally {

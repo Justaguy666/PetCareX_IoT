@@ -1,79 +1,88 @@
 import mqtt from "mqtt";
-
-const MQTT_HOST = process.env.MQTT_HOST;
-const MQTT_PORT = Number(process.env.MQTT_PORT || 8883);
-const MQTT_USER = process.env.MQTT_USER;
-const MQTT_PASS = process.env.MQTT_PASS;
-
-const TOPIC_COMMAND = process.env.TOPIC_COMMAND;
-const TOPIC_IS_AUTO = process.env.TOPIC_IS_AUTO;
-const TOPIC_FOOD_AMOUNT = process.env.TOPIC_FOOD_AMOUNT;
+import { MQTT_CONFIG, TOPICS } from "../config/mqtt.js";
+import { esp32Store } from "../stores/esp32Store.js";
+import User from "../app/models/User.js";
 
 let client;
-let isConnected = false;
 
 export function initEsp32Mqtt() {
   if (client) return client;
 
-  client = mqtt.connect({
-    host: MQTT_HOST,
-    port: MQTT_PORT,
-    protocol: "mqtts",
-    username: MQTT_USER,
-    password: MQTT_PASS,
-    reconnectPeriod: 2000,
-    keepalive: 60,
-  });
+  client = mqtt.connect(MQTT_CONFIG);
 
   client.on("connect", () => {
-    isConnected = true;
     console.log("[MQTT] Connected");
+
+    client.subscribe([
+      TOPICS.FOOD_LEVEL,
+      TOPICS.WATER_LEVEL,
+      TOPICS.STATUS,
+    ]);
   });
 
-  client.on("close", () => {
-    isConnected = false;
-    console.log("[MQTT] Disconnected");
+  client.on("message", async (topic, message) => {
+    const value = message.toString();
+
+    switch (topic) {  
+      case TOPICS.FOOD_LEVEL:
+        esp32Store.foodLevel = value;
+        break;
+      case TOPICS.WATER_LEVEL:
+        esp32Store.waterLevel = value;
+        break;
+      case TOPICS.STATUS:
+        esp32Store.latestStatus = value;
+        try {
+          let statusRaw = String(value);
+          try {
+            const parsed = JSON.parse(statusRaw);
+            if (parsed && parsed.status) statusRaw = parsed.status;
+          } catch (e) {
+          }
+
+          const normalized = String(statusRaw).toLowerCase().includes('status') ? 'missed' : 'success';
+
+          const users = await User.find({});
+          await Promise.all(users.map(async (user) => {
+            const newEntry = {
+              time: new Date(),
+              amount: user.configurations?.food_amount ?? 0,
+              status: normalized
+            };
+            user.history.push(newEntry);
+            await user.save();
+          }));
+        } catch (err) {
+          console.error('[ESP32 SERVICE] Failed to update feeding history:', err);
+        }
+
+        break;
+      default:
+        break;
+    }
+
+    esp32Store.updatedAt = new Date();
   });
 
   client.on("error", (err) => {
-    console.log("[MQTT] Error:", err?.message || err);
+    console.log("[MQTT] Error:", err.message);
   });
 
   return client;
 }
 
 export async function publishCommand(command) {
-  if (!client) initEsp32Mqtt();
-  if (!isConnected) throw new Error("MQTT not connected");
-
-  return new Promise((resolve, reject) => {
-    client.publish(TOPIC_COMMAND, command, { qos: 1, retain: false }, (err) => {
-      if (err) return reject(err);
-      resolve(true);
-    });
-  });
+  client.publish(TOPICS.COMMAND, command, { qos: 2 });
 }
 
 export async function publishIsAuto(mode) {
-    if (!client) initEsp32Mqtt();
-    if (!isConnected) throw new Error("MQTT not connected");
-  
-    return new Promise((resolve, reject) => {
-      client.publish(TOPIC_IS_AUTO, mode, { qos: 1, retain: false }, (err) => {
-        if (err) return reject(err);
-        resolve(true);
-      });
-    });
+  client.publish(TOPICS.IS_AUTO, String(mode), { qos: 2 });
 }
 
 export async function publishFoodAmount(amount) {
-    if (!client) initEsp32Mqtt();
-    if (!isConnected) throw new Error("MQTT not connected");
+  client.publish(TOPICS.FOOD_AMOUNT, String(amount), { qos: 2 });
+}
 
-    return new Promise((resolve, reject) => {
-      client.publish(TOPIC_FOOD_AMOUNT, amount, { qos: 1, retain: false }, (err) => {
-        if (err) return reject(err);
-        resolve(true);
-      });
-    });
+export async function publishSchedule(schedule) {
+  client.publish(TOPICS.SCHEDULE, JSON.stringify(schedule), { qos: 2 });  
 }

@@ -1,4 +1,4 @@
-const BASE_API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
 class ChatbotService {
     constructor() {
@@ -14,7 +14,7 @@ class ChatbotService {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(`${BASE_API_URL}/chatbot`, {
+        const response = await fetch(`${API_URL}/chatbot`, {
             method: 'POST',
             headers,
             credentials: 'include',

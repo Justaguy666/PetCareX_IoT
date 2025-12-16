@@ -1,66 +1,44 @@
-import { publishCommand,
-         publishIsAuto,
-         publishFoodAmount,
+import { esp32Store } from "../../stores/esp32Store.js";
+import {
+  publishCommand,
+  publishIsAuto,
+  publishFoodAmount,
+  publishSchedule
  } from "../../services/esp32Service.js";
 
 class Esp32Controller {
+  getFoodLevel = async (req, res) => {
+    res.json({ ok: true, foodLevel: esp32Store.foodLevel });
+  };
+
+  getWaterLevel = async (req, res) => {
+    res.json({ ok: true, waterLevel: esp32Store.waterLevel });
+  };
+
   food = async (req, res) => {
-    try {
-      const command = "FOOD";
-
-      await publishCommand(command);
-
-      return res.json({ ok: true, published: command });
-    } catch (err) {
-      return res.status(500).json({ error: err?.message || "Internal error" });
-    }
+    publishCommand("FOOD");
+    return res.json({ ok: true });
   };
 
   water = async (req, res) => {
-    try {
-      const command = "WATER";
-
-      await publishCommand(command);
-
-      return res.json({ ok: true, published: command });
-    } catch (err) {
-      return res.status(500).json({ error: err?.message || "Internal error" });
-    }
+    publishCommand("WATER");
+    return res.json({ ok: true });
   };
 
   toggleAuto = async (req, res) => {
-    try {
-        const mode = req.body?.mode;
-
-        if(!mode) {
-            return res.status(400).json({ error: "Missing mode" });
-        }
-  
-        await publishIsAuto(mode);
-  
-        return res.json({ ok: true, published: mode });
-    } catch (err) {
-        return res.status(500).json({ error: err?.message || "Internal error" });
-    }
+    publishIsAuto(req.body.mode);
+    return res.json({ ok: true });
   }
 
-  // SCHEDULE
-
-
-  // FOOD AMOUNT
   changeFoodAmount = async (req, res) => {
-    try {
-        const amount = String(req.body?.amount);
-        if(!amount) {
-            return res.status(400).json({ error: "Missing amount" });
-        }
-        await publishFoodAmount(amount);
-        
-        return res.json({ ok: true, published: amount });
-    } catch (err) {
-        return res.status(500).json({ error: err?.message || "Internal error" });
-    }
+    publishFoodAmount(req.body.amount);
+    return res.json({ ok: true });
   }
+
+  changeSchedule = async (req, res) => {
+    publishSchedule(req.body.schedule);
+    return res.json({ ok: true });
+  };
 }
 
 export default new Esp32Controller();

@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Utensils, Droplets, Clock, AlarmClock } from 'lucide-react';
 import userService from '../services/userService';
+import esp32Service from '../services/esp32Service';
 
 export default function Dashboard() {
-    const [foodLevel, setFoodLevel] = useState(75);
-    const [waterLevel, setWaterLevel] = useState(75);
+    const [foodLevel, setFoodLevel] = useState(0);
+    const [waterLevel, setWaterLevel] = useState(0);
     const [lastFedTime, setLastFedTime] = useState('--:--');
     const [nextFeedTime, setNextFeedTime] = useState('--:--');
     const [loading, setLoading] = useState(true);
@@ -12,9 +13,11 @@ export default function Dashboard() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [newestRes, nextRes] = await Promise.all([
+                const [newestRes, nextRes, foodLevelRes, waterLevelRes] = await Promise.all([
                     userService.getNewestFeeding(),
-                    userService.getNextFeeding()
+                    userService.getNextFeeding(),
+                    esp32Service.getFoodLevel(),
+                    esp32Service.getWaterLevel()
                 ]);
 
                 if (newestRes.feeding) {
@@ -24,6 +27,14 @@ export default function Dashboard() {
 
                 if (nextRes.nextFeeding) {
                     setNextFeedTime(nextRes.nextFeeding.time);
+                }
+
+                if (foodLevelRes.foodLevel) {
+                    setFoodLevel(foodLevelRes.foodLevel);
+                }
+
+                if (waterLevelRes.waterLevel) {
+                    setWaterLevel(waterLevelRes.waterLevel);
                 }
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);
@@ -66,13 +77,19 @@ export default function Dashboard() {
             </div>
 
             {/* Feed Now Button */}
-            <button className="action-button feed-button">
+            <button 
+                className="action-button feed-button"
+                onClick={() => esp32Service.sendFoodCommand()}
+            >
                 <Utensils size={24} />
                 <span>Cho ăn ngay</span>
             </button>
 
             {/* Water Now Button */}
-            <button className="action-button water-button">
+            <button 
+                className="action-button water-button"
+                onClick={() => esp32Service.sendWaterCommand()}
+            >
                 <Droplets size={24} />
                 <span>Cho uống ngay</span>
             </button>

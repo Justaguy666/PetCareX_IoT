@@ -136,12 +136,14 @@ class UserController {
                 return res.status(404).json({ message: 'User not found' });
             }
             
+            const history = user.history || [];
             const totalFeedings = user.history.length;
             const successFeedings = user.history.filter(h => h.status === 'success').length;
             const missedFeedings = user.history.filter(h => h.status === 'missed').length;
             const totalAmount = user.history.reduce((sum, h) => sum + h.amount, 0);
             
             res.json({
+                history,
                 totalFeedings,
                 successFeedings,
                 missedFeedings,
@@ -152,7 +154,7 @@ class UserController {
             console.error('Error fetching feeding statistics:', e);
             res.status(500).json({ message: 'Internal server error' });
         }
-    }
+    } 
 
     async getWeeklyReport(req, res) {
         try {

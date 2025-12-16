@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Utensils, AlertTriangle, Calendar } from 'lucide-react';
 import userService from '../services/userService';
+import esp32Service from '../services/esp32Service';
 
 export default function Settings() {
     const [mode, setMode] = useState('manual');
@@ -35,6 +36,7 @@ export default function Settings() {
         setMode(newMode);
         try {
             await userService.updateSettings({ is_automatic: newMode === 'auto' });
+            await esp32Service.toggleAutoMode(newMode === 'auto');
         } catch (error) {
             console.error('Error updating mode:', error);
         }
@@ -52,11 +54,13 @@ export default function Settings() {
 
     const handleFoodAmountChange = async (value) => {
         setFoodAmount(value);
+        await esp32Service.changeFoodAmount(value);
     };
 
     const handleFoodAmountBlur = async () => {
         try {
             await userService.updateSettings({ food_amount: foodAmount });
+            await esp32Service.changeFoodAmount(foodAmount);
         } catch (error) {
             console.error('Error updating food amount:', error);
         }

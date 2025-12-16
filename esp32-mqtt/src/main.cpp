@@ -5,7 +5,7 @@ WiFiClientSecure espClient;
 PubSubClient client(espClient);
 Servo feeder;
 bool is_auto;
-int schedule[100][2];
+std::vector<ScheduleItem> schedule;
 
 // ================= WIFI/MQTT CONFIG =================
 const char* ssid = "Wokwi-GUEST";
@@ -46,7 +46,9 @@ void setup() {
 
   Serial.println("PetCareX ESP32 started (HiveMQ)");
 
+  client.subscribe(TOPIC_COMMAND);
   client.subscribe(TOPIC_IS_AUTO);
+  client.subscribe(TOPIC_SCHEDULE);
 }
 
 void loop() {
@@ -63,11 +65,11 @@ void loop() {
   char foodLevelPayload[64];
 
   snprintf(waterLevelPayload, sizeof(waterLevelPayload),
-           "{\"water_level\":%d}",
+           "%d",
            waterPercent);
 
   snprintf(foodLevelPayload, sizeof(foodLevelPayload),
-           "{\"food_level\":%d}",
+           "%d",
            foodPercent);
 
   client.publish(TOPIC_WATER_LEVEL, waterLevelPayload);
@@ -88,28 +90,28 @@ void loop() {
   }
 
   if (is_auto) {
-    for (auto & timeSlot : schedule) {
-      if (now[0] == timeSlot[0] && now[1] == timeSlot[1] && canFeed) {
-        feedPet();
-        delay(60000);
+    for (auto & scheduleItem : schedule) {
+      if (now[0] == scheduleItem.getHour() && now[1] == scheduleItem.getMinute() && scheduleItem.getEnabled() && canFeed) {
+        waterAndFeedPet();
+        delay(10000);
         break;
-      } else if (now[0] == timeSlot[0] && now[1] == timeSlot[1] && !canFeed) {
+      } else if (now[0] == scheduleItem.getHour() && now[1] == scheduleItem.getMinute() && scheduleItem.getEnabled() && !canFeed) {
         Serial.println("Food and water levels sufficient, no need to feed.");
-        client.publish(TOPIC_STATUS, "Failed");
-        delay(60000);
+        client.publish(TOPIC_STATUS, "missed");
+        delay(10000);
         break;
       }
     }
   }
 
   if (digitalRead(BTN_FEED) == HIGH && canFeed) {
-    feedPet();
+    waterAndFeedPet();
     delay(2000);
   } else if (digitalRead(BTN_FEED) == HIGH && !canFeed) {
     Serial.println("Food and water levels sufficient, no need to feed.");
-    client.publish(TOPIC_STATUS, "Failed");
+    client.publish(TOPIC_STATUS, "missed");
     delay(2000);
   }
 
-  delay(5000);
+  delay(500);
 }
