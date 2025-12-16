@@ -23,7 +23,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 
   if (String(topic) == TOPIC_COMMAND) {
     if (msg == "FOOD") feedPet();
-    if (msg == "WATER") digitalWrite(RELAY_PIN, HIGH);
+    if (msg == "WATER") waterPet();
   }
 
   if (String(topic) == TOPIC_IS_AUTO) {
@@ -37,7 +37,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   }
 
   if (String(topic) == TOPIC_SCHEDULE) {
-    
+    Serial.println(msg);
   }
 }
 

@@ -6,6 +6,7 @@ import cors from 'cors';
 import route from './routes/index.js';
 import db from './config/db.js'
 import cookieParser from 'cookie-parser';
+import { initEsp32Mqtt } from './services/esp32Service.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -25,6 +26,9 @@ route(app);
 
 // Database
 db();
+
+// MQTT Protocol
+initEsp32Mqtt();
 
 // Start server
 app.listen(PORT, () => {

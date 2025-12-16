@@ -1,0 +1,22 @@
+[1mdiff --git a/server/server.js b/server/server.js[m
+[1mindex 7f41c7a..d67db22 100644[m
+[1m--- a/server/server.js[m
+[1m+++ b/server/server.js[m
+[36m@@ -6,6 +6,7 @@[m [mimport cors from 'cors';[m
+ import route from './routes/index.js';[m
+ import db from './config/db.js'[m
+ import cookieParser from 'cookie-parser';[m
+[32m+[m[32mimport { initEsp32Mqtt } from './services/esp32Service.js';[m
+ [m
+ const app = express();[m
+ const PORT = process.env.PORT || 3001;[m
+[36m@@ -26,6 +27,9 @@[m [mroute(app);[m
+ // Database[m
+ db();[m
+ [m
+[32m+[m[32m// MQTT Protocol[m
+[32m+[m[32minitEsp32Mqtt();[m
+[32m+[m
+ // Start server[m
+ app.listen(PORT, () => {[m
+     console.log(`Server running on http://localhost:${PORT}`);[m

@@ -29,3 +29,11 @@ void feedPet() {
   digitalWrite(RELAY_PIN, LOW);
   client.publish(TOPIC_STATUS, "success");  
 }
+
+void waterPet() {
+  Serial.println("Water pet...");
+  digitalWrite(RELAY_PIN, HIGH);
+  delay(1500);
+  digitalWrite(RELAY_PIN, LOW);
+  client.publish(TOPIC_STATUS, "success");  
+}
