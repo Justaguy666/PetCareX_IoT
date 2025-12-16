@@ -8,7 +8,7 @@ float readDistanceCM(int trigPin, int echoPin) {
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
 
-  long duration = pulseIn(echoPin, HIGH, 10000);
+  long duration = pulseIn(echoPin, HIGH, 30000);
   if (duration == 0) return -1;
   return duration * 0.034 / 2;
 }
@@ -24,16 +24,14 @@ void feedPet() {
   Serial.println("Feeding pet...");
   feeder.write(90);
   delay(1000);
-  feeder.write(0);
-  client.publish(TOPIC_STATUS, "success");  
+  feeder.write(0);  
 }
 
 void waterPet() {
   Serial.println("Water pet...");
   digitalWrite(RELAY_PIN, HIGH);
   delay(1000);
-  digitalWrite(RELAY_PIN, LOW);
-  client.publish(TOPIC_STATUS, "success");  
+  digitalWrite(RELAY_PIN, LOW); 
 }
 
 void waterAndFeedPet() {

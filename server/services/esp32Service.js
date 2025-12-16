@@ -36,8 +36,25 @@ export function initEsp32Mqtt() {
         try {
           const users = await User.find({});
           await Promise.all(users.map(async (user) => {
+            if (value !== "success" && value !== "missed") return;
+
+            const now = new Date();
+            const lastEntry = user.history && user.history.length > 0
+              ? user.history[user.history.length - 1]
+              : null;
+
+            if (
+              lastEntry &&
+              lastEntry.status === value &&
+              lastEntry.time &&
+              (now.getTime() - new Date(lastEntry.time).getTime()) < 2000
+            )
+            {
+              return;
+            }
+
             const newEntry = {
-              time: new Date(),
+              time: now,
               amount: user.configurations?.food_amount ?? 0,
               status: value
             };

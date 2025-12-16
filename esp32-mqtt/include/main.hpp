@@ -18,4 +18,7 @@ extern WiFiClientSecure espClient;
 extern PubSubClient client;
 extern Servo feeder;
 extern bool is_auto;
+extern bool can_feed;
+extern bool can_water;
 extern std::vector<ScheduleItem> schedule;
+extern unsigned long lastStatusPublishMillis;

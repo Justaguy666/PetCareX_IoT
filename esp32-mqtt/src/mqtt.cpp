@@ -28,9 +28,48 @@ void mqttCallback(char *topic, byte *payload, unsigned int length)
   if (String(topic) == TOPIC_COMMAND)
   {
     if (msg == "FOOD")
-      feedPet();
-    if (msg == "WATER")
-      waterPet();
+    {
+      if (can_feed)
+      {
+        feedPet();
+        if (millis() - lastStatusPublishMillis > 5000)
+        {
+          client.publish(TOPIC_STATUS, "success");
+          lastStatusPublishMillis = millis();
+        }
+      }
+      else
+      {
+        Serial.println("Cannot feed now, check levels.");
+        if (millis() - lastStatusPublishMillis > 5000)
+        {
+          client.publish(TOPIC_STATUS, "missed");
+          lastStatusPublishMillis = millis();
+        }
+      }
+    }
+
+    else if (msg == "WATER")
+    {
+      if (can_water)
+      {
+        waterPet();
+        if (millis() - lastStatusPublishMillis > 5000)
+        {
+          client.publish(TOPIC_STATUS, "success");
+          lastStatusPublishMillis = millis();
+        }
+      }
+      else
+      {
+        Serial.println("Cannot water now, check levels.");
+        if (millis() - lastStatusPublishMillis > 5000)
+        {
+          client.publish(TOPIC_STATUS, "missed");
+          lastStatusPublishMillis = millis();
+        }
+      }
+    }
   }
 
   if (String(topic) == TOPIC_IS_AUTO)
@@ -67,13 +106,13 @@ void mqttCallback(char *topic, byte *payload, unsigned int length)
     {
       const char* timeStr = obj["time"];
       bool enabled = obj["enabled"];
-      
+
       int hour, minute;
       sscanf(timeStr, "%d:%d", &hour, &minute);
-      
+
       ScheduleItem item(hour, minute, enabled);
       schedule.push_back(item);
-      
+
       Serial.print("Item: "); Serial.print(hour); Serial.print(":"); Serial.print(minute);
       Serial.print(" enabled="); Serial.println(enabled);
     }
