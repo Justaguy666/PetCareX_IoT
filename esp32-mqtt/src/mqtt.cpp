@@ -22,9 +22,22 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   Serial.println(msg);
 
   if (String(topic) == TOPIC_COMMAND) {
-    if (msg == "FEED") feedPet();
-    if (msg == "PUMP_ON") digitalWrite(RELAY_PIN, HIGH);
-    if (msg == "PUMP_OFF") digitalWrite(RELAY_PIN, LOW);
+    if (msg == "FOOD") feedPet();
+    if (msg == "WATER") digitalWrite(RELAY_PIN, HIGH);
+  }
+
+  if (String(topic) == TOPIC_IS_AUTO) {
+    if (msg == "ON") {
+      is_auto = true;
+      Serial.println("🤖 Auto mode enabled");
+    } else if (msg == "OFF") {
+      is_auto = false;
+      Serial.println("🤖 Auto mode disabled");
+    }
+  }
+
+  if (String(topic) == TOPIC_SCHEDULE) {
+    
   }
 }
 
@@ -34,7 +47,8 @@ void reconnectMQTT() {
     if (client.connect("esp32-petcarex", mqtt_user, mqtt_pass)) {
       Serial.println(" connected");
       client.subscribe(TOPIC_COMMAND);
-      client.publish(TOPIC_STATUS, "ESP32 Online");
+      client.subscribe(TOPIC_IS_AUTO);
+      client.subscribe(TOPIC_SCHEDULE);
     } else {
       Serial.print(" failed, rc=");
       Serial.println(client.state());

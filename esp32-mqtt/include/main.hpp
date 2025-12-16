@@ -4,6 +4,7 @@
 #include <WiFiClientSecure.h>
 #include <ESP32Servo.h>
 
+#include "time.h"
 #include "../include/pinConfig.hpp"
 #include "../include/deviceConfig.hpp"
 #include "../include/mqttConfig.hpp"
@@ -13,3 +14,4 @@
 extern WiFiClientSecure espClient;
 extern PubSubClient client;
 extern Servo feeder;
+extern bool is_auto;

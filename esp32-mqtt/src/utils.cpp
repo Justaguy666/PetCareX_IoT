@@ -23,6 +23,8 @@ int calcPercent(float distance, float height) {
 void feedPet() {
   Serial.println("🐾 Feeding pet...");
   feeder.write(90);
+  digitalWrite(RELAY_PIN, HIGH);
   delay(1500);
   feeder.write(0);
+  digitalWrite(RELAY_PIN, LOW);
 }

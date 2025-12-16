@@ -4,6 +4,8 @@
 WiFiClientSecure espClient;
 PubSubClient client(espClient);
 Servo feeder;
+bool is_auto;
+int schedule[100][2];
 
 // ================= WIFI/MQTT CONFIG =================
 const char* ssid = "Wokwi-GUEST";
@@ -12,6 +14,12 @@ const char* mqtt_server = "bb2c782916b34e689328539f4439a1b2.s1.eu.hivemq.cloud";
 const int   mqtt_port   = 8883;
 const char* mqtt_user   = "petcare";
 const char* mqtt_pass   = "Petcare123";
+
+// ================= TIME CONFIG =================
+const char* ntpServer = "pool.ntp.org";
+const long  gmtOffset_sec = 7 * 3600; // GMT+7
+const int   daylightOffset_sec = 0;
+struct tm timeinfo;
 
 void setup() {
   Serial.begin(115200);
@@ -34,7 +42,11 @@ void setup() {
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(mqttCallback);
 
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+
   Serial.println("🚀 PetCareX ESP32 started (HiveMQ)");
+
+  client.subscribe(TOPIC_IS_AUTO);
 }
 
 void loop() {
@@ -47,22 +59,57 @@ void loop() {
   int waterPercent = calcPercent(distWater, TANK_HEIGHT_CM);
   int foodPercent  = calcPercent(distFood, FOOD_HEIGHT_CM);
 
-  char payload[64];
-  snprintf(payload, sizeof(payload),
-           "{\"water\":%d,\"food\":%d}",
-           waterPercent, foodPercent);
+  char waterLevelPayload[64];
+  char foodLevelPayload[64];
 
-  client.publish(TOPIC_SENSOR, payload);
+  snprintf(waterLevelPayload, sizeof(waterLevelPayload),
+           "{\"level_percent\":%d}",
+           waterPercent);
 
-  digitalWrite(RELAY_PIN, waterPercent < 30 ? HIGH : LOW);
+  snprintf(foodLevelPayload, sizeof(foodLevelPayload),
+           "{\"level_percent\":%d}",
+           foodPercent);
 
-  if (foodPercent < 20) {
-    feedPet();
-    delay(5000);
+  client.publish(TOPIC_WATER_LEVEL, waterLevelPayload);
+  client.publish(TOPIC_FOOD_LEVEL, foodLevelPayload);
+
+  extern bool canFeed;
+
+  canFeed = (foodPercent < 20 || waterPercent < 20);
+
+  if (!getLocalTime(&timeinfo)) {
+    Serial.println("Failed to obtain time");
   }
 
-  if (digitalRead(BTN_FEED) == LOW) {
+  const int now[] = {timeinfo.tm_hour, timeinfo.tm_min};
+
+  if (canFeed) {
+    digitalWrite(LED_STATUS, HIGH);
+  } else {
+    digitalWrite(LED_STATUS, LOW);
+  }
+
+  if (is_auto) {
+    for (auto & timeSlot : schedule) {
+      if (now[0] == timeSlot[0] && now[1] == timeSlot[1] && canFeed) {
+        feedPet();
+        delay(60000);
+        break;
+      } else if (now[0] == timeSlot[0] && now[1] == timeSlot[1] && !canFeed) {
+        Serial.println("ℹ️ Food and water levels sufficient, no need to feed.");
+        client.publish(TOPIC_STATUS, "Failed");
+        delay(60000);
+        break;
+      }
+    }
+  }
+
+  if (digitalRead(BTN_FEED) == LOW && canFeed) {
     feedPet();
+    delay(2000);
+  } else if (digitalRead(BTN_FEED) == LOW && !canFeed) {
+    Serial.println("ℹ️ Food and water levels sufficient, no need to feed.");
+    client.publish(TOPIC_STATUS, "Failed");
     delay(2000);
   }
 
