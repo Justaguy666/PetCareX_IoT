@@ -8,7 +8,7 @@ float readDistanceCM(int trigPin, int echoPin) {
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
 
-  long duration = pulseIn(echoPin, HIGH, 30000);
+  long duration = pulseIn(echoPin, HIGH, 10000);
   if (duration == 0) return -1;
   return duration * 0.034 / 2;
 }
@@ -21,10 +21,11 @@ int calcPercent(float distance, float height) {
 }
 
 void feedPet() {
-  Serial.println("🐾 Feeding pet...");
+  Serial.println("Feeding pet...");
   feeder.write(90);
   digitalWrite(RELAY_PIN, HIGH);
   delay(1500);
   feeder.write(0);
   digitalWrite(RELAY_PIN, LOW);
+  client.publish(TOPIC_STATUS, "success");  
 }

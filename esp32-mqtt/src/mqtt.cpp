@@ -29,10 +29,10 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   if (String(topic) == TOPIC_IS_AUTO) {
     if (msg == "ON") {
       is_auto = true;
-      Serial.println("🤖 Auto mode enabled");
+      Serial.println("Auto mode enabled");
     } else if (msg == "OFF") {
       is_auto = false;
-      Serial.println("🤖 Auto mode disabled");
+      Serial.println("Auto mode disabled");
     }
   }
 

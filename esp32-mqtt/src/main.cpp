@@ -31,7 +31,7 @@ void setup() {
 
   pinMode(RELAY_PIN, OUTPUT);
   pinMode(LED_STATUS, OUTPUT);
-  pinMode(BTN_FEED, INPUT_PULLUP);
+  pinMode(BTN_FEED, INPUT);
 
   feeder.attach(SERVO_PIN);
   feeder.write(0);
@@ -44,7 +44,7 @@ void setup() {
 
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 
-  Serial.println("🚀 PetCareX ESP32 started (HiveMQ)");
+  Serial.println("PetCareX ESP32 started (HiveMQ)");
 
   client.subscribe(TOPIC_IS_AUTO);
 }
@@ -63,19 +63,17 @@ void loop() {
   char foodLevelPayload[64];
 
   snprintf(waterLevelPayload, sizeof(waterLevelPayload),
-           "{\"level_percent\":%d}",
+           "{\"water_level\":%d}",
            waterPercent);
 
   snprintf(foodLevelPayload, sizeof(foodLevelPayload),
-           "{\"level_percent\":%d}",
+           "{\"food_level\":%d}",
            foodPercent);
 
   client.publish(TOPIC_WATER_LEVEL, waterLevelPayload);
   client.publish(TOPIC_FOOD_LEVEL, foodLevelPayload);
 
-  extern bool canFeed;
-
-  canFeed = (foodPercent < 20 || waterPercent < 20);
+  bool canFeed = (foodPercent >= 20 && waterPercent >= 20);
 
   if (!getLocalTime(&timeinfo)) {
     Serial.println("Failed to obtain time");
@@ -96,7 +94,7 @@ void loop() {
         delay(60000);
         break;
       } else if (now[0] == timeSlot[0] && now[1] == timeSlot[1] && !canFeed) {
-        Serial.println("ℹ️ Food and water levels sufficient, no need to feed.");
+        Serial.println("Food and water levels sufficient, no need to feed.");
         client.publish(TOPIC_STATUS, "Failed");
         delay(60000);
         break;
@@ -104,11 +102,11 @@ void loop() {
     }
   }
 
-  if (digitalRead(BTN_FEED) == LOW && canFeed) {
+  if (digitalRead(BTN_FEED) == HIGH && canFeed) {
     feedPet();
     delay(2000);
-  } else if (digitalRead(BTN_FEED) == LOW && !canFeed) {
-    Serial.println("ℹ️ Food and water levels sufficient, no need to feed.");
+  } else if (digitalRead(BTN_FEED) == HIGH && !canFeed) {
+    Serial.println("Food and water levels sufficient, no need to feed.");
     client.publish(TOPIC_STATUS, "Failed");
     delay(2000);
   }

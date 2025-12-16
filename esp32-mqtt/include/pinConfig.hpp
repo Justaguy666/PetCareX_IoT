@@ -1,8 +1,8 @@
-#define TRIG_WATER   4
-#define ECHO_WATER   16
+#define TRIG_FOOD   4
+#define ECHO_FOOD   16
 
-#define TRIG_FOOD    5
-#define ECHO_FOOD    18
+#define TRIG_WATER    5
+#define ECHO_WATER    18
 
 #define SERVO_PIN    21
 
