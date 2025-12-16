@@ -323,8 +323,8 @@ class AuthController {
 
   changePassword = async (req, res) => {
     try {
-      const { userId, oldPassword, newPassword } = req.body;
-
+      const userId = req.user.id;
+      const { currentPassword: oldPassword, newPassword } = req.body;
       if (!userId || !oldPassword || !newPassword) {
         return res
           .status(400)

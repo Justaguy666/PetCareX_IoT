@@ -5,6 +5,7 @@ import EditEmailModal from '../components/EditEmailModal';
 import ChangePasswordModal from '../components/ChangePasswordModal';
 import ChangeAvatarModal from '../components/ChangeAvatarModal';
 import userService from '../services/userService';
+import { toast } from "react-toastify";
 
 export default function PersonalInformation() {
     const { logout, user } = useAuth();
@@ -46,16 +47,23 @@ export default function PersonalInformation() {
         try {
             await userService.updateProfile({ email: newEmail });
             setProfile(prev => ({ ...prev, email: newEmail }));
+            toast.success('Thay đổi email thành công');
             setShowEditEmail(false);
         } catch (error) {
             console.error('Error updating email:', error);
-            alert(error.message);
+            toast.error(error.message);
         }
     };
 
-    const handleSavePassword = (passwordData) => {
-        console.log('Password changed successfully', passwordData);
-        setShowChangePassword(false);
+    const handleSavePassword = async (passwordData) => {
+        try {
+            const { currentPassword, newPassword } = passwordData;
+            await userService.changePassword({ currentPassword, newPassword });
+            toast.success('Thay đổi mật khẩu thành công');
+            setShowChangePassword(false);
+        } catch (error) {
+            toast.error(error?.message || error?.error);
+        }
     };
 
     const handleAvatarUpload = (file) => {

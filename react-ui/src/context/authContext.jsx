@@ -1,77 +1,76 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import authService from "../services/authService";
 import userService from "../services/userService";
 import { toast } from "react-toastify";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false);
 
+  // Khi mở app lên (hoặc F5), gọi API lấy profile để biết còn đăng nhập hay không
   useEffect(() => {
-    if (!initialized) {
-      setLoading(false);
-      return;
-    }
-
-    userService
-      .getProfile()
-      .then((res) => {
-        if (res.user) {
-          setUser(res.user);
-        } else {
-          setUser(res);
-        }
-      })
-      .catch(() => {
+    const checkLogin = async () => {
+      try {
+        const res = await userService.getProfile();
+        setUser(res.user || res);
+      } catch (err) {
         setUser(null);
-      })
-      .finally(() => setLoading(false));
-  }, [initialized]);
-  const navigate = useNavigate();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkLogin();
+  }, []);
 
   const login = async (email, password) => {
     try {
       const res = await authService.login(email, password);
-      setUser({ id: res.data.id });
-      setInitialized(true);
-      navigate("/");
+
+      // Sau login gọi profile để lấy đầy đủ user
+      const profile = await userService.getProfile();
+      setUser(profile.user || profile);
+
       toast.success(res?.message || "Đăng nhập thành công");
+      navigate("/", { replace: true });
     } catch (error) {
-      throw Error(error?.message);
+      toast.error(error?.message || "Đăng nhập thất bại");
+      throw error;
     }
   };
 
   const register = async (name, email, password) => {
     try {
       const res = await authService.register(name, email, password);
-      setUser(null);
-      navigate("/login");
       toast.success(res?.message || "Đăng ký thành công");
+      navigate("/login", { replace: true });
     } catch (error) {
-      throw Error(error?.message);
+      toast.error(error?.message || "Đăng ký thất bại");
+      throw error;
     }
   };
 
   const logout = async () => {
     try {
-        await authService.logout();
-    } catch {}
-
-    setUser(null);
-    setInitialized(false);
-    navigate("/login");
+      await authService.logout();
+    } catch (error) {
+      console.log("Logout API failed:", error);
+    } finally {
+      setUser(null);
+      toast.success("Đăng xuất thành công");
+      navigate("/login", { replace: true });
+    }
   };
 
-  const isAuthenticated = !!user;
-
   if (loading) return null;
+
   return (
     <AuthContext.Provider
-      value={{ user, login, logout, register, isAuthenticated }}
+      value={{ user, login, logout, register, isAuthenticated: !!user }}
     >
       {children}
     </AuthContext.Provider>

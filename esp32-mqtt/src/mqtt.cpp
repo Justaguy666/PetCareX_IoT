@@ -81,6 +81,10 @@ void mqttCallback(char *topic, byte *payload, unsigned int length)
     Serial.print("Schedule updated, total items: ");
     Serial.println(schedule.size());
   }
+
+  if (String(topic) == TOPIC_FOOD_AMOUNT) {
+    Serial.println(msg);
+  }
 }
 
 void reconnectMQTT()
@@ -94,9 +98,8 @@ void reconnectMQTT()
       client.subscribe(TOPIC_COMMAND);
       client.subscribe(TOPIC_IS_AUTO);
       client.subscribe(TOPIC_SCHEDULE);
-    }
-    else
-    {
+      client.subscribe(TOPIC_FOOD_AMOUNT);
+    } else {
       Serial.print(" failed, rc=");
       Serial.println(client.state());
       delay(2000);

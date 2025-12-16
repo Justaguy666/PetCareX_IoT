@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Utensils, AlertTriangle, Calendar } from 'lucide-react';
 import userService from '../services/userService';
 import esp32Service from '../services/esp32Service';
+import { toast } from "react-toastify"; // ✅ thêm dòng này
 
 export default function Settings() {
     const [mode, setMode] = useState('manual');
@@ -27,42 +28,64 @@ export default function Settings() {
             setFoodAmount(config.food_amount);
         } catch (error) {
             console.error('Error fetching settings:', error);
+            toast.error("Không thể tải cài đặt. Vui lòng thử lại!");
         } finally {
             setLoading(false);
         }
     };
 
     const handleModeChange = async (newMode) => {
+        const prevMode = mode;
         setMode(newMode);
+
         try {
             await userService.updateSettings({ is_automatic: newMode === 'auto' });
             await esp32Service.toggleAutoMode(newMode === 'auto');
+            toast.success(`Đã chuyển sang chế độ ${newMode === 'auto' ? 'Tự động' : 'Thủ công'}`);
         } catch (error) {
             console.error('Error updating mode:', error);
+            setMode(prevMode); // rollback UI
+            toast.error("Đổi chế độ thất bại. Vui lòng thử lại!");
         }
     };
 
     const toggleNotification = async (key) => {
         const newValue = !notifications[key];
+
+        // optimistic update
         setNotifications(prev => ({ ...prev, [key]: newValue }));
+
         try {
             await userService.updateSettings({ notifications: { [key]: newValue } });
+            toast.success(newValue ? "Đã bật thông báo" : "Đã tắt thông báo");
         } catch (error) {
             console.error('Error updating notification:', error);
+            // rollback
+            setNotifications(prev => ({ ...prev, [key]: !newValue }));
+            toast.error("Cập nhật thông báo thất bại!");
         }
     };
 
     const handleFoodAmountChange = async (value) => {
         setFoodAmount(value);
-        await esp32Service.changeFoodAmount(value);
+
+        // Nếu bạn không muốn spam ESP32 liên tục khi kéo slider,
+        // có thể bỏ dòng dưới và chỉ gửi ở handleFoodAmountBlur.
+        try {
+            await esp32Service.changeFoodAmount(value);
+        } catch (error) {
+            console.error('Error changing food amount realtime:', error);
+        }
     };
 
     const handleFoodAmountBlur = async () => {
         try {
             await userService.updateSettings({ food_amount: foodAmount });
             await esp32Service.changeFoodAmount(foodAmount);
+            toast.success(`Đã lưu khẩu phần: ${foodAmount}g`);
         } catch (error) {
             console.error('Error updating food amount:', error);
+            toast.error("Lưu khẩu phần thất bại!");
         }
     };
 
