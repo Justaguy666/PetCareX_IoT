@@ -4,7 +4,7 @@
 #define TRIG_FOOD    5
 #define ECHO_FOOD    18
 
-#define SERVO_PIN    13
+#define SERVO_PIN    21
 
 #define RELAY_PIN    19
 
