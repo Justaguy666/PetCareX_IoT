@@ -1,0 +1,2 @@
+#define TANK_HEIGHT_CM   20.0
+#define FOOD_HEIGHT_CM  15.0
