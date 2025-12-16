@@ -16,11 +16,10 @@ const handleResponse = async (response, originalRequest) => {
     try {
       const refreshRes = await authService.refreshToken();
       if (refreshRes?.accessToken) {
-        localStorage.setItem("token", refreshRes.accessToken);
         return await originalRequest();
       }
     } catch (e) {
-      localStorage.removeItem("token");
+        console.error("Error handling response:", e);
     }
     throw new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
   }
@@ -86,6 +85,21 @@ class AuthService {
     if (!response.ok) {
       throw new Error(data?.message || "Refresh token failed");
     }
+    return data;
+  }
+
+  async logout() {
+    const response = await fetch(`${API_URL}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    const data = await safeParse(response);
+
+    if (!response.ok) {
+      throw new Error(data?.message || "Logout failed");
+    }
+
     return data;
   }
 }

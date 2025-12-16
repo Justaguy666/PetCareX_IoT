@@ -5,9 +5,7 @@ class ChatbotService {
         this.conversationId = null;
     }
 
-    async sendMessage(message) {
-        const token = localStorage.getItem('token');
-        
+    async sendMessage(message) {        
         const headers = {
             'Content-Type': 'application/json',
         };

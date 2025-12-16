@@ -1,6 +1,5 @@
 import { X } from 'lucide-react';
 
-
 export default function WeeklyChart({ onClose, weeklyData = [] }) {
     const data = (weeklyData && weeklyData.length === 7)
         ? weeklyData

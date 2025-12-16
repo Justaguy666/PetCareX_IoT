@@ -210,12 +210,21 @@ class AuthController {
     logout = async (req, res) => {
         try {
             const refreshToken = req.cookies?.RefreshToken;
-
             if (refreshToken) {
                 await RefreshToken.deleteOne({ refreshId: refreshToken });
                 res.clearCookie("refreshToken", {
                     httpOnly: true,
                     sameSite: 'strict',
+                    secure: true,
+                    path: '/'
+                });
+            }
+
+            const accessToken = req.cookies?.AccessToken;
+            if (accessToken) {
+                res.clearCookie("AccessToken", {
+                    httpOnly: true,
+                    sameSite: 'lax',
                     secure: true,
                     path: '/'
                 });

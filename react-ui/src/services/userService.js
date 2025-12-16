@@ -13,13 +13,12 @@ const handleResponse = async (response, originalRequest) => {
         try {
             const refreshRes = await authService.refreshToken();
             if (refreshRes && refreshRes.accessToken) {
-                localStorage.setItem('token', refreshRes.accessToken);
                 if (typeof originalRequest === 'function') {
                     return await originalRequest();
                 }
             }
         } catch (e) {
-            localStorage.removeItem('token');
+            console.error('Error refreshing token:', e);
         }
         throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
     }
@@ -31,11 +30,11 @@ const handleResponse = async (response, originalRequest) => {
 };
 
 class UserService {
-
     async getNewestFeeding() {
         const doRequest = async () => {
             const response = await fetch(`${API_URL}/users/feeding/newest`, {
-                headers: { ...getAuthHeader() }
+                headers: { ...getAuthHeader() },
+                credentials: 'include'
             });
             return handleResponse(response, doRequest);
         };
@@ -45,7 +44,8 @@ class UserService {
     async getNextFeeding() {
         const doRequest = async () => {
             const response = await fetch(`${API_URL}/users/feeding/next`, {
-                headers: { ...getAuthHeader() }
+                headers: { ...getAuthHeader() },
+                credentials: 'include'
             });
             return handleResponse(response, doRequest);
         };
@@ -55,7 +55,8 @@ class UserService {
     async getSchedules() {
         const doRequest = async () => {
             const response = await fetch(`${API_URL}/users/settings`, {
-                headers: { ...getAuthHeader() }
+                headers: { ...getAuthHeader() },
+                credentials: 'include'
             });
             return handleResponse(response, doRequest);
         };
@@ -70,7 +71,8 @@ class UserService {
                     'Content-Type': 'application/json',
                     ...getAuthHeader()
                 },
-                body: JSON.stringify({ time })
+                body: JSON.stringify({ time }),
+                credentials: 'include'
             });
             return handleResponse(response, doRequest);
         };
@@ -85,7 +87,8 @@ class UserService {
                     'Content-Type': 'application/json',
                     ...getAuthHeader()
                 },
-                body: JSON.stringify({ oldTime, newTime, enabled })
+                body: JSON.stringify({ oldTime, newTime, enabled }),
+                credentials: 'include'
             });
             return handleResponse(response, doRequest);
         };
@@ -100,7 +103,8 @@ class UserService {
                     'Content-Type': 'application/json',
                     ...getAuthHeader()
                 },
-                body: JSON.stringify({ time })
+                body: JSON.stringify({ time }),
+                credentials: 'include'
             });
             return handleResponse(response, doRequest);
         };
@@ -110,7 +114,8 @@ class UserService {
     async getStatistics() {
         const doRequest = async () => {
             const response = await fetch(`${API_URL}/users/statistics`, {
-                headers: { ...getAuthHeader() }
+                headers: { ...getAuthHeader() },
+                credentials: 'include'
             });
             return handleResponse(response, doRequest);
         };
@@ -120,7 +125,8 @@ class UserService {
     async getWeeklyReport() {
         const doRequest = async () => {
             const response = await fetch(`${API_URL}/users/weekly-report`, {
-                headers: { ...getAuthHeader() }
+                headers: { ...getAuthHeader() },
+                credentials: 'include'
             });
             return handleResponse(response, doRequest);
         };
@@ -130,7 +136,8 @@ class UserService {
     async getSettings() {
         const doRequest = async () => {
             const response = await fetch(`${API_URL}/users/settings`, {
-                headers: { ...getAuthHeader() }
+                headers: { ...getAuthHeader() },
+                credentials: 'include'
             });
             return handleResponse(response, doRequest);
         };
@@ -145,7 +152,8 @@ class UserService {
                     'Content-Type': 'application/json',
                     ...getAuthHeader()
                 },
-                body: JSON.stringify(settings)
+                body: JSON.stringify(settings),
+                credentials: 'include'
             });
             return handleResponse(response, doRequest);
         };
@@ -155,7 +163,8 @@ class UserService {
     async getProfile() {
         const doRequest = async () => {
             const response = await fetch(`${API_URL}/users/profile`, {
-                headers: { ...getAuthHeader() }
+                headers: { ...getAuthHeader() },
+                credentials: 'include'
             });
             return handleResponse(response, doRequest);
         };
@@ -170,7 +179,8 @@ class UserService {
                     'Content-Type': 'application/json',
                     ...getAuthHeader()
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
+                credentials: 'include'
             });
             return handleResponse(response, doRequest);
         };
