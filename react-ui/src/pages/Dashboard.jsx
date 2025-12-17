@@ -63,7 +63,7 @@ export default function Dashboard() {
       setActionLoading(true);
       await esp32Service.sendFoodCommand();
       toast.success("Đã gửi lệnh cho ăn");
-      await fetchData(); // refresh lại số liệu
+      await fetchData();
     } catch (err) {
       console.error(err);
       toast.error(err?.message || "Gửi lệnh cho ăn thất bại");

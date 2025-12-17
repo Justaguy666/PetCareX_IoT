@@ -11,7 +11,6 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Khi mở app lên (hoặc F5), gọi API lấy profile để biết còn đăng nhập hay không
   useEffect(() => {
     const checkLogin = async () => {
       try {
@@ -31,7 +30,6 @@ export function AuthProvider({ children }) {
     try {
       const res = await authService.login(email, password);
 
-      // Sau login gọi profile để lấy đầy đủ user
       const profile = await userService.getProfile();
       setUser(profile.user || profile);
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Utensils, AlertTriangle, Calendar } from 'lucide-react';
 import userService from '../services/userService';
 import esp32Service from '../services/esp32Service';
-import { toast } from "react-toastify"; // ✅ thêm dòng này
+import { toast } from "react-toastify";
 
 export default function Settings() {
     const [mode, setMode] = useState('manual');
@@ -44,7 +44,7 @@ export default function Settings() {
             toast.success(`Đã chuyển sang chế độ ${newMode === 'auto' ? 'Tự động' : 'Thủ công'}`);
         } catch (error) {
             console.error('Error updating mode:', error);
-            setMode(prevMode); // rollback UI
+            setMode(prevMode);
             toast.error("Đổi chế độ thất bại. Vui lòng thử lại!");
         }
     };
@@ -52,7 +52,6 @@ export default function Settings() {
     const toggleNotification = async (key) => {
         const newValue = !notifications[key];
 
-        // optimistic update
         setNotifications(prev => ({ ...prev, [key]: newValue }));
 
         try {
@@ -60,7 +59,6 @@ export default function Settings() {
             toast.success(newValue ? "Đã bật thông báo" : "Đã tắt thông báo");
         } catch (error) {
             console.error('Error updating notification:', error);
-            // rollback
             setNotifications(prev => ({ ...prev, [key]: !newValue }));
             toast.error("Cập nhật thông báo thất bại!");
         }
@@ -69,8 +67,6 @@ export default function Settings() {
     const handleFoodAmountChange = async (value) => {
         setFoodAmount(value);
 
-        // Nếu bạn không muốn spam ESP32 liên tục khi kéo slider,
-        // có thể bỏ dòng dưới và chỉ gửi ở handleFoodAmountBlur.
         try {
             await esp32Service.changeFoodAmount(value);
         } catch (error) {

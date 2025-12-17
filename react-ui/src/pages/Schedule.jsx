@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { AlarmClock, Plus, X } from 'lucide-react';
 import userService from '../services/userService';
 import esp32Service from '../services/esp32Service';
-import { toast } from "react-toastify"; // ✅ thêm
+import { toast } from "react-toastify";
 
 export default function Schedule() {
     const [schedules, setSchedules] = useState([]);
@@ -31,7 +31,6 @@ export default function Schedule() {
             s.time === time ? { ...s, enabled: !currentEnabled } : s
         );
 
-        // optimistic UI
         setSchedules(updatedSchedules);
 
         try {
@@ -40,7 +39,6 @@ export default function Schedule() {
             toast.success(!currentEnabled ? "Đã bật lịch" : "Đã tắt lịch");
         } catch (error) {
             console.error('Error toggling schedule:', error);
-            // rollback
             setSchedules(schedules);
             toast.error("Cập nhật lịch thất bại!");
         }
@@ -48,8 +46,6 @@ export default function Schedule() {
 
     const deleteSchedule = async (time) => {
         const updatedSchedules = schedules.filter(s => s.time !== time);
-
-        // optimistic UI
         setSchedules(updatedSchedules);
 
         try {
@@ -58,7 +54,6 @@ export default function Schedule() {
             toast.success("Đã xóa lịch");
         } catch (error) {
             console.error('Error deleting schedule:', error);
-            // rollback
             setSchedules(schedules);
             toast.error("Xóa lịch thất bại!");
         }
