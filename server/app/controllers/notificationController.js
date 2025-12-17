@@ -159,6 +159,111 @@ class NotificationController {
                 `
         }
     }
+
+    sendScheduleTentativeMail = async (req, res) => {
+        try {
+            const { email } = req.body;
+            if (!email) {
+                return res.status(400).json({ error: "Thiếu email" });
+            }
+    
+            const mail = {
+                to: email,
+                subject: "⏰ Sắp đến giờ cho ăn thú cưng",
+                html: `
+                    <div style="font-family: Arial; padding:20px">
+                        <h3>⏰ Thông báo lịch dự kiến</h3>
+                        <p>
+                            Hệ thống nhắc nhở:
+                            <strong>15 phút nữa</strong> sẽ đến giờ cho ăn.
+                        </p>
+                    </div>
+                `
+            };
+    
+            await sendMail(mail);
+    
+            return res.status(200).json({
+                success: true,
+                message: "Đã gửi thông báo lịch dự kiến qua email",
+            });
+        } catch (error) {
+            console.log("[SCHEDULE_TENTATIVE_MAIL]:", error);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
+
+    sendScheduleTentativePhone = async (req, res) => {
+        try {
+            const result = await pushSafer(
+                `15 phút nữa sẽ đến giờ cho ăn`,
+                "⏰ Lịch cho ăn dự kiến"
+            );
+    
+            const data = JSON.parse(result);
+            if (data.error) throw Error(data.error);
+    
+            return res.status(200).json({
+                success: true,
+                message: "Đã gửi thông báo lịch dự kiến đến điện thoại",
+            });
+        } catch (error) {
+            console.log("[SCHEDULE_TENTATIVE_PHONE]:", error);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
+
+    sendScheduleMail = async (req, res) => {
+        try {
+            const { email } = req.body;
+            if (!email) {
+                return res.status(400).json({ error: "Thiếu email hoặc thời gian" });
+            }
+    
+            const mail = {
+                to: email,
+                subject: "🍽️ Đến giờ cho ăn thú cưng",
+                html: `
+                    <div style="font-family: Arial; padding:20px">
+                        <h3>🍽️ Thông báo cho ăn</h3>
+                        <p>
+                            Hiện tại đã đến giờ cho ăn theo lịch.
+                        </p>
+                    </div>
+                `
+            };
+    
+            await sendMail(mail);
+    
+            return res.status(200).json({
+                success: true,
+                message: "Đã gửi thông báo đến giờ cho ăn qua email",
+            });
+        } catch (error) {
+            console.log("[SCHEDULE_NOW_MAIL]:", error);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
+    
+    sendSchedulePhone = async (req, res) => {
+        try {
+            const result = await pushSafer(
+                `Đã đến giờ cho ăn`,
+                "🍽️ Đến giờ cho ăn"
+            );
+    
+            const data = JSON.parse(result);
+            if (data.error) throw Error(data.error);
+    
+            return res.status(200).json({
+                success: true,
+                message: "Đã gửi thông báo đến giờ cho ăn đến điện thoại",
+            });
+        } catch (error) {
+            console.log("[SCHEDULE_NOW_PHONE]:", error);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+    }    
 }
 
 export default new NotificationController();

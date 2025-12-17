@@ -8,7 +8,7 @@ import {
 
 class Esp32Controller {
   getFoodLevel = async (req, res) => {
-    console.log(esp32Store.foodLevel);
+    console.log(esp32Store);
     res.json({ ok: true, foodLevel: esp32Store.foodLevel });
   };
 

@@ -22,7 +22,6 @@ export function initEsp32Mqtt() {
 
   client.on("message", async (topic, message) => {
     const value = message.toString();
-
     switch (topic) {  
       case TOPICS.FOOD_LEVEL:
         console.log(`[MQTT] Food Level: ${value}`);

@@ -148,5 +148,5 @@ void loop()
       delay(2000);
     }
 
-  delay(500);
+  delay(10000);
 }
