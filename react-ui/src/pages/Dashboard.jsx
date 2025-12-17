@@ -31,11 +31,9 @@ export default function Dashboard() {
           esp32Service.getWaterLevel(),
         ]);
 
-      // newest feeding time
       const newestTime = newestRes?.feeding?.time;
       setLastFedTime(formatTimeHHMM(newestTime));
 
-      // next feeding time (nếu API trả về time dạng "HH:mm" thì giữ nguyên)
       const nextTime = nextRes?.nextFeeding?.time;
       setNextFeedTime(
         typeof nextTime === "string" && nextTime.includes(":")
@@ -43,12 +41,11 @@ export default function Dashboard() {
           : formatTimeHHMM(nextTime)
       );
 
-      // ✅ Fix: cho phép value = 0
-      const f = foodLevelRes?.foodLevel;
-      if (typeof f === "number") setFoodLevel(f);
+      const f = (foodLevelRes && foodLevelRes.foodLevel) || 0;
+      setFoodLevel(f);
 
-      const w = waterLevelRes?.waterLevel;
-      if (typeof w === "number") setWaterLevel(w);
+      const w = (waterLevelRes && waterLevelRes.waterLevel) || 0;
+      setWaterLevel(w);
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
       toast.error("Không tải được dữ liệu dashboard");

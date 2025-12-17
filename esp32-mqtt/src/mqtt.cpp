@@ -32,20 +32,12 @@ void mqttCallback(char *topic, byte *payload, unsigned int length)
       if (can_feed)
       {
         feedPet();
-        if (millis() - lastStatusPublishMillis > 5000)
-        {
-          client.publish(TOPIC_STATUS, "success");
-          lastStatusPublishMillis = millis();
-        }
+        client.publish(TOPIC_STATUS, "success");
       }
       else
       {
         Serial.println("Cannot feed now, check levels.");
-        if (millis() - lastStatusPublishMillis > 5000)
-        {
-          client.publish(TOPIC_STATUS, "missed");
-          lastStatusPublishMillis = millis();
-        }
+        client.publish(TOPIC_STATUS, "missed");
       }
     }
 
@@ -54,20 +46,12 @@ void mqttCallback(char *topic, byte *payload, unsigned int length)
       if (can_water)
       {
         waterPet();
-        if (millis() - lastStatusPublishMillis > 5000)
-        {
-          client.publish(TOPIC_STATUS, "success");
-          lastStatusPublishMillis = millis();
-        }
+        client.publish(TOPIC_STATUS, "success");
       }
       else
       {
         Serial.println("Cannot water now, check levels.");
-        if (millis() - lastStatusPublishMillis > 5000)
-        {
-          client.publish(TOPIC_STATUS, "missed");
-          lastStatusPublishMillis = millis();
-        }
+        client.publish(TOPIC_STATUS, "missed");
       }
     }
   }

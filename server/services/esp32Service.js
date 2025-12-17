@@ -25,9 +25,11 @@ export function initEsp32Mqtt() {
 
     switch (topic) {  
       case TOPICS.FOOD_LEVEL:
+        console.log(`[MQTT] Food Level: ${value}`);
         esp32Store.foodLevel = value;
         break;
       case TOPICS.WATER_LEVEL:
+        console.log(`[MQTT] Water Level: ${value}`);
         esp32Store.waterLevel = value;
         break;
       case TOPICS.STATUS:

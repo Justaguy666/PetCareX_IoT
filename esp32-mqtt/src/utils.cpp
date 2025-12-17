@@ -8,7 +8,7 @@ float readDistanceCM(int trigPin, int echoPin) {
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
 
-  long duration = pulseIn(echoPin, HIGH, 30000);
+  long duration = pulseIn(echoPin, HIGH, 10000);
   if (duration == 0) return -1;
   return duration * 0.034 / 2;
 }

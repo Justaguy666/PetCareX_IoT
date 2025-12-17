@@ -34,9 +34,6 @@ export default function History() {
                 missedFeedings: statsRes.missedFeedings
             });
 
-            const historyRes = await userService.getHistory();
-            setHistoryItems(historyRes.history || []);
-
         } catch (error) {
             console.error('Error fetching history:', error);
         } finally {

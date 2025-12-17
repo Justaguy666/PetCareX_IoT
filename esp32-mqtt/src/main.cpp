@@ -10,7 +10,6 @@ bool is_auto;
 bool can_feed;
 bool can_water;
 std::vector<ScheduleItem> schedule;
-unsigned long lastStatusPublishMillis = 0;
 
 // ================= WIFI/MQTT CONFIG =================
 const char *ssid = "Wokwi-GUEST";
@@ -61,31 +60,8 @@ void loop()
 
   client.loop();
 
-  static float lastValidDistWater = -1;
-  static float lastValidDistFood = -1;
-
   float distWater = readDistanceCM(TRIG_WATER, ECHO_WATER);
   float distFood = readDistanceCM(TRIG_FOOD, ECHO_FOOD);
-
-  if (distWater < 0 || distWater > 400 || distWater > (TANK_HEIGHT_CM * 1.5) ||
-      (lastValidDistWater >= 0 && fabsf(distWater - lastValidDistWater) > 50))
-  {
-    distWater = lastValidDistWater;
-  }
-  else
-  {
-    lastValidDistWater = distWater;
-  }
-
-  if (distFood < 0 || distFood > 400 || distFood > (FOOD_HEIGHT_CM * 1.5) ||
-      (lastValidDistFood >= 0 && fabsf(distFood - lastValidDistFood) > 50))
-  {
-    distFood = lastValidDistFood;
-  }
-  else
-  {
-    lastValidDistFood = distFood;
-  }
 
   int waterPercent = calcPercent(distWater, TANK_HEIGHT_CM);
   int foodPercent = calcPercent(distFood, FOOD_HEIGHT_CM);
@@ -139,10 +115,7 @@ void loop()
         if (can_feed_and_water)
         {
           waterAndFeedPet();
-          if (millis() - lastStatusPublishMillis > 5000) {
-            client.publish(TOPIC_STATUS, "success");
-            lastStatusPublishMillis = millis();
-          }
+          client.publish(TOPIC_STATUS, "success");
 
           lastFeedHour = now[0];
           lastFeedMinute = now[1];
@@ -151,10 +124,7 @@ void loop()
         }
         else
         {
-          if (millis() - lastStatusPublishMillis > 5000) {
-            client.publish(TOPIC_STATUS, "missed");
-            lastStatusPublishMillis = millis();
-          }
+          client.publish(TOPIC_STATUS, "missed");
 
           lastFeedHour = now[0];
           lastFeedMinute = now[1];
@@ -165,42 +135,16 @@ void loop()
     }
   }
 
-    static int lastBtnReading = HIGH;
-    static int stableBtnState = HIGH;
-    static unsigned long lastBtnChangeMillis = 0;
-
-    const int btnReading = digitalRead(BTN_FEED);
-    if (btnReading != lastBtnReading)
-    {
-      lastBtnChangeMillis = millis();
-      lastBtnReading = btnReading;
-    }
-
-    if ((millis() - lastBtnChangeMillis) > 50)
-    {
-      stableBtnState = btnReading;
-    }
-
-    static int lastStableBtnState = HIGH;
-    const bool btnPressedEdge = (lastStableBtnState == HIGH && stableBtnState == LOW);
-    lastStableBtnState = stableBtnState;
-
-    if (btnPressedEdge && can_feed_and_water)
+    if (digitalRead(BTN_FEED) == HIGH && can_feed_and_water)
     {
       waterAndFeedPet();
-      if (millis() - lastStatusPublishMillis > 5000) {
-        client.publish(TOPIC_STATUS, "success");
-        lastStatusPublishMillis = millis();
-      }
+      client.publish(TOPIC_STATUS, "success");
       delay(2000);
     }
-    else if (btnPressedEdge && !can_feed_and_water)
+    else if (digitalRead(BTN_FEED) == HIGH && !can_feed_and_water)
     {
       Serial.println("Food and water levels insufficient, cannot feed now.");
-      if (millis() - lastStatusPublishMillis > 5000) {
-        client.publish(TOPIC_STATUS, "missed");
-        lastStatusPublishMillis = millis();
-      }
+      client.publish(TOPIC_STATUS, "missed");
       delay(2000);
     }
 

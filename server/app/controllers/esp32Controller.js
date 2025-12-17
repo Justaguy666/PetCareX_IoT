@@ -8,10 +8,12 @@ import {
 
 class Esp32Controller {
   getFoodLevel = async (req, res) => {
+    console.log(esp32Store.foodLevel);
     res.json({ ok: true, foodLevel: esp32Store.foodLevel });
   };
 
   getWaterLevel = async (req, res) => {
+    console.log(esp32Store.waterLevel);
     res.json({ ok: true, waterLevel: esp32Store.waterLevel });
   };
 
