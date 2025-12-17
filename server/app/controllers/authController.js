@@ -277,23 +277,7 @@ class AuthController {
         html: `
                     <p>Mật khẩu tạm thời của bạn:</p>
 
-                    <input
-                        type="password"
-                        value=${tempPassword}
-                        readonly
-                        style="
-                            border: none;
-                            background: #f3f3f3;
-                            padding: 10px;
-                            font-size: 18px;
-                            width: 220px;
-                            letter-spacing: 2px;
-                        "
-                    />
-
-                    <p style="font-size:12px;color:#666">
-                        Click vào ô để xem mật khẩu
-                    </p>
+                    <p style="font-size:18px;font-weight:bold;color: red;">${tempPassword}</p>
                 `,
       });
 

@@ -135,18 +135,18 @@ void loop()
     }
   }
 
-    if (digitalRead(BTN_FEED) == HIGH && can_feed_and_water)
-    {
-      waterAndFeedPet();
-      client.publish(TOPIC_STATUS, "success");
-      delay(2000);
-    }
-    else if (digitalRead(BTN_FEED) == HIGH && !can_feed_and_water)
-    {
-      Serial.println("Food and water levels insufficient, cannot feed now.");
-      client.publish(TOPIC_STATUS, "missed");
-      delay(2000);
-    }
+  if (digitalRead(BTN_FEED) == HIGH && can_feed_and_water)
+  {
+    waterAndFeedPet();
+    client.publish(TOPIC_STATUS, "success");
+    delay(2000);
+  }
+  else if (digitalRead(BTN_FEED) == HIGH && !can_feed_and_water)
+  {
+    Serial.println("Food and water levels insufficient, cannot feed now.");
+    client.publish(TOPIC_STATUS, "missed");
+    delay(2000);
+  }
 
-  delay(10000);
+  delay(1000);
 }
