@@ -84,6 +84,8 @@ void loop()
   can_water = waterPercent >= 20;
   bool can_feed_and_water = can_feed && can_water;
 
+  bool warning = !can_feed || !can_water;
+
   if (!getLocalTime(&timeinfo))
   {
     Serial.println("Failed to obtain time");
@@ -91,13 +93,13 @@ void loop()
 
   const int now[] = {timeinfo.tm_hour, timeinfo.tm_min};
 
-  if (!can_feed_and_water)
+  if (warning)
   {
-    digitalWrite(LED_STATUS, HIGH);
+    digitalWrite(LED_STATUS, LOW);
   }
   else
   {
-    digitalWrite(LED_STATUS, LOW);
+    digitalWrite(LED_STATUS, HIGH);
   }
 
   if (is_auto)
