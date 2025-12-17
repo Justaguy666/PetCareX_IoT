@@ -178,11 +178,18 @@ class UserController {
                 return t >= monday && t <= sunday;
             });
 
+            const toLocalDateString = (date) => {
+                const d = new Date(date);
+                d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                return d.toISOString().split('T')[0];
+            };
+
+
             const dailyData = [];
             for (let i = 0; i < 7; i++) {
                 const d = new Date(monday);
                 d.setDate(monday.getDate() + i);
-                const dateStr = d.toISOString().split('T')[0];
+                const dateStr = toLocalDateString(d);
                 dailyData.push({
                     date: dateStr,
                     weekday: i < 6 ? `T${i+2}` : 'CN',
@@ -197,7 +204,7 @@ class UserController {
             dailyData.forEach((item, idx) => { dateToIndex[item.date] = idx; });
 
             weekHistory.forEach(h => {
-                const dateStr = new Date(h.time).toISOString().split('T')[0];
+                const dateStr = toLocalDateString(h.time);
                 const idx = dateToIndex[dateStr];
                 if (idx !== undefined) {
                     dailyData[idx].feedings++;
