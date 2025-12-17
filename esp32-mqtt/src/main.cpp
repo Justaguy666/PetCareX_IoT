@@ -91,7 +91,7 @@ void loop()
 
   const int now[] = {timeinfo.tm_hour, timeinfo.tm_min};
 
-  if (can_feed_and_water)
+  if (!can_feed_and_water)
   {
     digitalWrite(LED_STATUS, HIGH);
   }
